@@ -1,5 +1,14 @@
 # PROGRESS (Ralph loop state) — CogMap
 
+## READ ME FIRST (Sissi, morning of 2026-09-13)
+- Everything is built, tested (14 tests, CI green), pushed: https://github.com/sissississi-013/cogmap · Weave: https://wandb.ai/sissiwang-maglev/cogmap/weave
+- Runbook: `docs/demo-storyboard.md` (storyboard, 3-min script, checklist). Submission text: `SUBMISSION.md`.
+- Morning command: record the venue → `./run_venue.sh footage/raw/venue.mov out/venue` (≈5 min; add a 3rd arg with a second clip after moving a chair for a REAL change round).
+- ⚠️ OpenAI credits are exhausted (429). Labels still work via the local OWLv2 detector; only the LLM post-mortem is skipped. Add credits or a valid ANTHROPIC_API_KEY if you want the LLM parts.
+- ⚠️ `orb start` before running if you want the Nav2 proof step (Docker); otherwise it is skipped.
+- Chrome extension wasn't connected overnight → take the two Weave screenshots yourself (checklist step 5).
+
+
 ## Iteration 1 — started 03:04 PDT
 - Repo: https://github.com/sissississi-013/cogmap (main). Weave entity sissiwang-maglev, project `cogmap`.
 - Spike results: VGGT on Modal works (A10G, ~90s end-to-end, 9.4GB VRAM); see spikes/vggt_modal/REPORT.md. A100 refused (no payment method) → use A10G. Genesis spike still running (spikes/genesis_sim/).
