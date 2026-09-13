@@ -12,7 +12,7 @@ Everything below is a file you open or a command you run. Record with QuickTime 
 | 1:10 | "Their failures are the signal. A repair agent proposes scene-graph edits, every edit is validated against what the robots actually observed, and the map version bumps. Success recovers." | Weave trace of `repair_map` → `llm_propose_ops` (applied vs rejected), then `curve.png` recovery |
 | 1:30 | "Second loop: the map learns where the world is volatile. Patrol agents check those cells before tasks run, so the next change is caught before anyone fails." | `swarm.mp4` patrol segment (orange path), `out/<run>/steps_to_recover.png` |
 | 1:45 | "Same loop, real scan and synthetic apartment. Leaderboard of map versions in Weave." | Weave leaderboard `cogmap-map-versions`; `marimo run dashboard.py` |
-| 1:55 | "The map outlives the robot generation: it exports to the Nav2 format a Go2 or G1 stack loads today — here is a stock ROS 2 map_server publishing it." | `out/<run>/go2_walk.mp4` (Genesis Go2 walking the planned path) + `docs/proof/nav2_planner.log` ("Goal finished with status: SUCCEEDED", 176 poses) |
+| 1:55 | "The map outlives the robot generation: it exports to the Nav2 format a Go2 or G1 stack loads today — here is a stock ROS 2 map_server publishing it." | `out/<run>/go2_walk.mp4` (Genesis Go2 walking the planned path) + `docs/proof/nav2_planner.log` ("Goal finished with status: SUCCEEDED", 143 poses) |
 
 ## Live 3-minute version
 Same order; add 30 s at the start recording the venue walkthrough on the phone earlier that morning and 20 s of Q&A buffer.
