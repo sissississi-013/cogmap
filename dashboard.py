@@ -73,8 +73,8 @@ def _(mo, os, run):
         parts.append(mo.video(vid, controls=True, width=1000))
     else:
         parts.append(mo.md("no animation rendered yet"))
-    go2 = os.path.join(run, "go2_on_map.mp4") if run else ""
-    if os.path.exists(go2):
+    go2 = next((os.path.join(run, f) for f in ("go2_walk.mp4", "go2_on_map.mp4") if run and os.path.exists(os.path.join(run, f))), "")
+    if go2:
         parts.append(mo.md("### Transfer: a Unitree Go2 (Genesis sim) dropped into the scanned map"))
         parts.append(mo.video(go2, controls=True, width=640))
     cl = os.path.join(run, "map_changelog.md") if run else ""
