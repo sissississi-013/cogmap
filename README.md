@@ -72,6 +72,38 @@ Real-scan results (luxury living room clip, TUM office sequence) are in `out/lux
 leaderboard; see below.
 
 
+
+### Real scans (12 reachability-checked tasks each, auto-generated world changes)
+
+**Living room, 18-second phone clip** (`out/lux`, 116×129 cells @ 0.15 m, 12 VLM-labelled objects):
+
+| map version / event | success | SPL | collisions | what happened |
+|---|---|---|---|---|
+| v0-initial | 100% | 0.93 | 0 | Initial cognitive map from the scan. |
+| v0-after-change-1 | 88% | 0.79 | 14 | The armchair was dragged into the busiest corridor (chokepoint at (64, 64)). |
+| v1-repaired-1.1 | 88% | 0.82 | 0 | The armchair was dragged into the busiest corridor (chokepoint at (64, 64)). |
+| v2-repaired-1.2 | 88% | 0.82 | 0 | The armchair was dragged into the busiest corridor (chokepoint at (64, 64)). |
+| v2-after-change-2 | 69% | 0.65 | 0 | The plant (goal of 3 tasks) was moved across the room to (38, 27). |
+| v3-repaired-2.1 | 75% | 0.75 | 0 | The plant (goal of 3 tasks) was moved across the room to (38, 27). |
+| v5-repaired-2.2 | 94% | 0.90 | 0 | The plant (goal of 3 tasks) was moved across the room to (38, 27). |
+| v5-after-change-3 | 94% | 0.93 | 0 | The armchair was put back: the corridor is open again but the map still thinks i |
+
+**Office, TUM RGB-D `freiburg1_room` sequence** (`out/tum`, 112×109 cells, desks/bookshelves/chairs):
+
+| map version / event | success | SPL | collisions | what happened |
+|---|---|---|---|---|
+| v0-initial | 100% | 0.91 | 0 | Initial cognitive map from the scan. |
+| v0-after-change-1 | 75% | 0.65 | 21 | The desk was dragged into the busiest corridor (chokepoint at (53, 53)). |
+| v1-repaired-1.1 | 100% | 0.89 | 0 | The desk was dragged into the busiest corridor (chokepoint at (53, 53)). |
+| v2-after-change-2 | 94% | 0.88 | 1 | The desk_5 (goal of 3 tasks) was moved across the room to (61, 34). |
+| v3-repaired-2.1 | 94% | 0.88 | 0 | The desk_5 (goal of 3 tasks) was moved across the room to (61, 34). |
+| v4-after-change-3 | 94% | 0.88 | 0 | The desk was put back: the corridor is open again but the map still thinks it is |
+
+In the office run, rounds 2 and 3 were caught by the patrols (the outer loop): the volatility prior sent verification agents
+to the cells that changed before, they saw the difference, and the map was repaired *before* the task swarm ran.
+
+<p align="center"><img src="docs/img/tum_curve.png" width="70%"></p>
+
 ### Ablation (synthetic apartment): what each part of the loop buys
 
 Cells are `final success / repairs needed / agent steps to recover`.

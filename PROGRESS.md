@@ -33,3 +33,8 @@
 - Synthetic ablation done: rule-only recovers all rounds too; LLM ops are evidence-gated (README table added).
 - Real-map issue found: when the blocker cut the only known route, agents probed unknown cells which the simulated truth treated as walls → persistent collisions. Fix: simulated truth extends floor 3 cells beyond seen floor; unknown-traversal cost raised to 4. Relaunched out/lux and out/tum loops with the fix (pending).
 - Per-evaluation Weave call URLs now recorded in loop_result.json and shown in the dashboard.
+
+## 03:50 PDT — real-map loops clean (iteration 3)
+- out/lux (living room): 100% → armchair blocks corridor 88%/14 coll → 88%/0 → plant moved 69% → 94% → stale obstacle round: 94% (no drop). out/tum (TUM office): 100% → desk blocks corridor 75%/21 coll → 100% → desk_5 moved: patrol pre-empted → 94% → desk put back: patrol pre-empted → 94%. Viz rendered for both; images published to Weave; README real-scan tables added; docs/img/{lux,tum}_curve.png.
+- Perturbation blocker now = largest non-goal object (applies to future runs incl. the venue scan).
+- NEXT: Weave UI screenshots (Chrome) for docs; final clean end-to-end run; keep improving until 10:00.
