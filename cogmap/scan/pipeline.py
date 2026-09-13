@@ -201,8 +201,16 @@ def scan_to_world(video: str, out_dir: str, n_frames: int = 48, cell: float = 0.
     print(f"[scan] {len(frames)} keyframes extracted ({time.time()-t0:.1f}s)")
     npz = os.path.join(sd, "vggt_out.npz")
     if not os.path.exists(npz) or os.environ.get("COGMAP_FORCE_VGGT"):
-        tm = run_vggt(frames, npz, max_frames=n_frames)
-        print(f"[scan] VGGT on Modal: {tm}")
+        for attempt in range(2):
+            try:
+                tm = run_vggt(frames, npz, max_frames=n_frames)
+                print(f"[scan] VGGT on Modal: {tm}")
+                break
+            except Exception as e:  # noqa: BLE001
+                print(f"[scan] VGGT attempt {attempt + 1} failed: {e}")
+                if attempt == 1:
+                    raise RuntimeError("VGGT reconstruction failed twice. Check `python -m modal deploy cogmap/scan/vggt_modal.py` "
+                                       "and Modal auth, then rerun.") from e
     g = build_grid(npz, cell=cell)
     grid = _clean_grid(g["grid"])
     save_grid_png(grid, os.path.join(sd, "occupancy_grid.png"))
@@ -244,6 +252,12 @@ def scan_to_world(video: str, out_dir: str, n_frames: int = 48, cell: float = 0.
     belief.save(os.path.join(sd, "belief_v0.json"))
     json.dump(world.to_json(), open(os.path.join(sd, "world.json"), "w"))
     tasks = reachable_tasks(world, n=n_tasks)
+    if len(tasks) < 4:          # tiny or fragmented scan: relax the distance requirement
+        tasks = reachable_tasks(world, n=n_tasks, min_dist=3)
+    if len(tasks) < 2:
+        raise RuntimeError(f"Only {len(tasks)} reachable navigation tasks could be built from this scan "
+                           f"(free cells={int((world.grid == FREE).sum())}, objects={len(objects)}). "
+                           "Record a longer, slower walkthrough that shows the floor and furniture.")
     json.dump(tasks, open(os.path.join(sd, "tasks.json"), "w"))
     perts = auto_perturbations(world, tasks)
     ex = export_nav2(belief, os.path.join(sd, "nav2"), resolution=cell, origin_xy=tuple(g["origin_xy"]))

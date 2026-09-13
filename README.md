@@ -44,6 +44,32 @@ flowchart LR
 3. Every function is a `@weave.op`; every map version is a Weave Evaluation named `map_v{k}`; a Weave Leaderboard ranks map
    versions.
 
+
+## Results (synthetic apartment, 16 fixed tasks, 4 scripted world changes, LLM repair + patrols on)
+
+| map version / event | success | SPL | collisions | what happened |
+|---|---|---|---|---|
+| v0-initial | 100% | 1.00 | 0 | Initial cognitive map from the scan. |
+| v0-after-change-1 | 100% | 0.95 | 12 | Someone dragged the coffee table into the living-room/bedroom doorway. |
+| v1-repaired-1.1 | 100% | 1.00 | 0 | Someone dragged the coffee table into the living-room/bedroom doorway. |
+| v1-after-change-2 | 75% | 0.75 | 0 | The couch was moved from the living room into the hallway. |
+| v2-repaired-2.1 | 100% | 1.00 | 0 | The couch was moved from the living room into the hallway. |
+| v3-after-change-3 | 100% | 1.00 | 0 | The coffee table went back to the living room: the doorway is open aga |
+| v3-after-change-4 | 81% | 0.79 | 5 | A laundry basket now blocks the bedroom/hallway doorway. |
+| v4-repaired-4.1 | 94% | 0.94 | 0 | A laundry basket now blocks the bedroom/hallway doorway. |
+
+| round | repairs | steps to recover | final success |
+|---|---|---|---|
+| 1 | 1 | 681 | 100% |
+| 2 | 1 | 902 | 100% |
+| 3 | 0 | 574 | 100% |
+| 4 | 1 | 860 | 94% |
+
+Round 3 is the outer loop at work: the volatility prior sent a patrol to the doorway that had changed before, it saw the
+stale obstacle was gone, and the map was repaired **before any task failed** (0 repairs, success stayed 100%).
+Real-scan results (luxury living room clip, TUM office sequence) are in `out/lux/` and `out/tum/` and on the Weave
+leaderboard; see below.
+
 ## What you see in the demo
 
 | stage | artifact |
