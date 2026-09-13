@@ -96,6 +96,20 @@ class CogMapLoop:
         print(f"[eval] {label}: success={m['success_rate']:.2f} spl={m['spl']:.2f} collisions={m['collisions']:.0f}")
         return m
 
+    def _explore(self) -> int:
+        """Scouts push into the frontier; observations are merged. Returns cells learned."""
+        ft = frontier_targets(self.belief.to_json())
+        if not ft:
+            return 0
+        er = run_patrols(self.belief.to_json(), self.world.to_json(), ft, list(self.patrol_start))
+        before = coverage(self.belief.to_json())["known_cells"]
+        rep = rule_repair(self.belief.to_json(), [], er["observations"])
+        self.belief = BeliefMap.from_json(rep["belief"])
+        learned = coverage(self.belief.to_json())["known_cells"] - before
+        print(f"  explore: {len(ft)} frontier targets, {er['steps']} steps, +{learned} cells learned -> v{self.belief.version}")
+        self._explore_steps = er["steps"]
+        return learned
+
     def _recovered(self, m: dict) -> bool:
         b = getattr(self, "baseline", None) or {"success_rate": 1.0, "collisions": 0, "spl": 1.0}
         return (m["success_rate"] >= min(self.recover_threshold, b["success_rate"] - 0.05)
@@ -126,6 +140,8 @@ class CogMapLoop:
         base = self._eval("v0-initial", "Initial cognitive map from the scan.")
         self.baseline = base
         self._snapshot("v0 initial map")
+        if self.use_explore and self._explore() > 0:
+            self._eval(f"v{self.belief.version}-explored", "Scouts explored the frontier of the scan; the map grew.", {"phase": "explored"})
         rounds = []
         for i, p in enumerate(perturbations, start=1):
             info = p["fn"](self.world, *p["args"])
@@ -137,17 +153,6 @@ class CogMapLoop:
             patrol_path = None
             patrol_preempted, patrol_cells = False, 0
             explored = 0
-            if self.use_explore:
-                ft = frontier_targets(self.belief.to_json())
-                if ft:
-                    er = run_patrols(self.belief.to_json(), self.world.to_json(), ft, list(self.patrol_start))
-                    steps_to_recover += er["steps"]
-                    before = coverage(self.belief.to_json())["known_cells"]
-                    rep = rule_repair(self.belief.to_json(), [], er["observations"])
-                    self.belief = BeliefMap.from_json(rep["belief"])
-                    explored = coverage(self.belief.to_json())["known_cells"] - before
-                    extra_obs = dict(er["observations"])
-                    print(f"  explore: {len(ft)} frontier targets, {er['steps']} steps, +{explored} cells learned -> v{self.belief.version}")
             if self.use_patrols and i > 1:
                 targets = patrol_targets(self.belief.to_json())
                 if targets:
@@ -203,6 +208,8 @@ class CogMapLoop:
                 if m["success_rate"] < self.recover_threshold:
                     steps_to_recover += swarm_out["summary"]["steps"]
                 self._snapshot(f"round {i}: repaired -> map v{self.belief.version}", swarm_out)
+            if self.use_explore:
+                explored = self._explore()
             rounds.append({"round": i, "story": story, "perturbation": info, "repairs": n_rep,
                            "steps_to_recover": steps_to_recover, "final_success": m["success_rate"],
                            "map_version": self.belief.version, "rule_ops": rule_ops_n,
