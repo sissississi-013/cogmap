@@ -29,7 +29,8 @@ def _(json, mo, os, run_sel):
     res = json.load(open(os.path.join(run, "loop_result.json"))) if run else {"timeline": [], "rounds": []}
     tl = res["timeline"]
     rows = [{"map version": f"v{m['version']}", "label": m["label"], "success": f"{m['success_rate']:.0%}",
-             "SPL": f"{m['spl']:.2f}", "collisions": int(m["collisions"]), "story": m.get("story", "")} for m in tl]
+             "SPL": f"{m['spl']:.2f}", "collisions": int(m["collisions"]), "story": m.get("story", ""),
+             "weave trace": m.get("weave_call_url", "")} for m in tl]
     rounds = [{"round": r["round"], "story": r["story"], "repairs": r["repairs"], "steps to recover": r["steps_to_recover"],
                "final success": f"{r['final_success']:.0%}"} for r in res["rounds"]]
     lb = res.get("leaderboard")

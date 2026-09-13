@@ -64,6 +64,16 @@ def evaluate_map(belief: BeliefMap, world: TrueWorld, tasks: List[dict], label: 
         out["eval_ref"] = weave.publish(ev, name=f"eval-{label}").uri()
     except Exception:  # noqa: BLE001
         out["eval_ref"] = None
+    try:  # clickable URL of this evaluation's trace
+        client = weave.get_client()
+        calls = list(client.get_calls(filter={"op_names": [f"weave:///{client.entity}/{client.project}/op/Evaluation.evaluate:*"]},
+                                      limit=3, sort_by=[{"field": "started_at", "direction": "desc"}]))
+        for k in calls:
+            if k.display_name == label:
+                out["weave_call_url"] = f"https://wandb.ai/{client.entity}/{client.project}/weave/calls/{k.id}"
+                break
+    except Exception:  # noqa: BLE001
+        pass
     return out
 
 
