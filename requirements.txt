@@ -1,0 +1,14 @@
+weave>=0.53
+wandb
+openai
+anthropic
+numpy
+scipy
+opencv-python-headless
+pillow
+matplotlib
+plotly
+modal
+marimo
+python-dotenv
+pytest

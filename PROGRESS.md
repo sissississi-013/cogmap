@@ -12,3 +12,12 @@
 - 5 tests green. Visuals verified by eye: out/synth_nollm/curve.png, snapshot_03.png, swarm.mp4 (15s).
 - Running now: full variant with LLM repair + patrols → out/synth_full/log.txt (Phase 3).
 - NEXT: check synth_full log; make sure LLM ops get applied (Weave traces); steps-to-recover should drop with patrols; then Phase 4 real scan (spikes/vggt_modal → cogmap/scan/).
+
+## 03:45 PDT — Phases 3 + 4 DONE, 5 in progress (iteration 1 continues)
+- LLM repair: ANTHROPIC_API_KEY in ~/.zshrc is INVALID (401). Added provider fallback → OpenAI gpt-5 (json mode) works; also the VLM detector uses gpt-5 vision. Tell Sissi to fix the Anthropic key in the morning if she wants Claude in the loop (COGMAP_LLM=anthropic).
+- Full synthetic run with LLM + patrols: out/synth_full (v0 100% → ch1 → v1 100% → ch2 75% → search sweep + rename → v2 100% → ch3 patrol pre-emptively repaired stale obstacle → 100% (no task failed) → ch4 81% → v4 94%). Viz rendered.
+- Real scan pipeline works: footage/fallback/luxury_room_18s.mp4 (18s continuous living-room clip) → 48 frames → VGGT on Modal (deployed app `cogmap-vggt`, A10G, ~35–55s wall incl. cold start, 6–8s GPU) → 116x129 grid @0.15m → gpt-5 detections (24 frames, ~50s) → 12 anchored objects (couches, armchairs, coffee tables, dining table, kitchen island, plant) → nav2 export. Total ~110s. Overview: out/lux/scan/scan_overview.png. Also TUM freiburg1_room (office, footage/tum/tum_room.mp4) → 12 objects (desks, bookshelves, chairs) in 81s.
+- Fallback apartment tour (apt_tour_61s) is a montage with cuts → fragmented reconstruction; not used for demo.
+- Running: `run_demo.py --video luxury_room_18s.mp4 --out out/lux` (full loop on real map; stdout is buffered under nohup — use `python -u` next time).
+- Written: dashboard.py (marimo), README.md draft, requirements.txt, docs/img/.
+- NEXT: verify out/lux loop result + curve; Genesis Go2 B-roll on the scanned heightfield (optional); SUBMISSION.md; final clean run; push.
