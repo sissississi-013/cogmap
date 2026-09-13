@@ -228,7 +228,7 @@ run_demo.py     CLI · dashboard.py  marimo · tests/  pytest
   static global costmap) plans a 178-pose path on it from a task start to the `bookshelf_2` waypoint
   (`scripts/nav2_plan.sh out/office`, `docs/proof/nav2_planner.log`: `Goal finished with status: SUCCEEDED`).
 
-  <p align="center"><img src="docs/img/nav2_map.png" width="55%"><br><sub>The exported map.pgm with the named waypoints, exactly as map_server publishes it.</sub></p>
+  <p align="center"><img src="docs/img/nav2_map.png" width="46%"> <img src="docs/img/nav2_path.png" width="46%"><br><sub>Left: the exported map.pgm with the named waypoints, exactly as map_server publishes it. Right: the path Nav2's NavFn planner computed on it (start → bookshelf_2), raw result in <code>docs/proof/nav2_path.yaml</code>.</sub></p>
 
 ## Prior work we build on
 

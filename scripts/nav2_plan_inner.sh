@@ -42,7 +42,8 @@ ros2 lifecycle set /planner_server configure >/dev/null && ros2 lifecycle set /p
 sleep 4
 echo "== compute_path_to_pose from (START_X, START_Y) to (GOAL_X, GOAL_Y) [GOAL_NAME]"
 timeout 40 ros2 action send_goal /compute_path_to_pose nav2_msgs/action/ComputePathToPose "{start: {header: {frame_id: map}, pose: {position: {x: START_X, y: START_Y}, orientation: {w: 1.0}}}, goal: {header: {frame_id: map}, pose: {position: {x: GOAL_X, y: GOAL_Y}, orientation: {w: 1.0}}}, use_start: true, planner_id: GridBased}" 2>&1 | grep -E "Goal accepted|poses:|planning_time|status|error_code" | head -8
-echo "== path length (poses):"; timeout 40 ros2 action send_goal /compute_path_to_pose nav2_msgs/action/ComputePathToPose "{start: {header: {frame_id: map}, pose: {position: {x: START_X, y: START_Y}, orientation: {w: 1.0}}}, goal: {header: {frame_id: map}, pose: {position: {x: GOAL_X, y: GOAL_Y}, orientation: {w: 1.0}}}, use_start: true, planner_id: GridBased}" 2>&1 | grep -c "position:" || true
+echo "== full path -> /out/nav2_path.yaml"; timeout 40 ros2 action send_goal /compute_path_to_pose nav2_msgs/action/ComputePathToPose "{start: {header: {frame_id: map}, pose: {position: {x: START_X, y: START_Y}, orientation: {w: 1.0}}}, goal: {header: {frame_id: map}, pose: {position: {x: GOAL_X, y: GOAL_Y}, orientation: {w: 1.0}}}, use_start: true, planner_id: GridBased}" > /out/nav2_path.yaml 2>&1 || true
+echo "poses: $(grep -c 'position:' /out/nav2_path.yaml)"
 echo "== costmap info"; timeout 15 ros2 topic echo /global_costmap/costmap --once --no-arr 2>&1 | grep -E "width|height|resolution|x:|y:" | head -6
 echo "== map_server log"; tail -3 /tmp/ms.log
 echo "== planner log"; grep -vE "^\s*$" /tmp/planner.log | tail -12

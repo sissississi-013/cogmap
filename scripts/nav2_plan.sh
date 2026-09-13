@@ -15,5 +15,6 @@ open(dst, "w").write(open(src).read().replace("START_X", f"{sx:.3f}").replace("S
 print(f"start ({sx:.2f},{sy:.2f}) -> {t['goal']} ({g['x']},{g['y']})")
 PY
 docker build -q -t cogmap-nav2 -f "$HERE/Dockerfile.nav2" "$HERE" >/dev/null
-docker run --rm -v "$RUN/scan/nav2:/maps:ro" -v "$TMP/plan.sh:/plan.sh:ro" cogmap-nav2 bash /plan.sh
+mkdir -p "$RUN/nav2_proof"
+docker run --rm -v "$RUN/scan/nav2:/maps:ro" -v "$RUN/nav2_proof:/out" -v "$TMP/plan.sh:/plan.sh:ro" cogmap-nav2 bash /plan.sh | tee "$RUN/nav2_proof/planner.log"
 rm -rf "$TMP"
