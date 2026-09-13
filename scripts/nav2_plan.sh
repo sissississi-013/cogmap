@@ -9,7 +9,9 @@ import json, sys
 run, src, dst = sys.argv[1:]
 wp = json.load(open(f"{run}/scan/nav2/waypoints.json"))["waypoints"]; tasks = json.load(open(f"{run}/scan/tasks.json"))
 meta = json.load(open(f"{run}/scan/grid_meta.json")); res, lo = meta["cell"], meta["origin_xy"]
-t = tasks[0]; s = t["start"]; g = wp[t["goal"]]
+def dist(t):  # pick the longest task so the planned path is worth looking at
+    a = wp[t["goal"]]["cell"]; return abs(t["start"][0] - a[0]) + abs(t["start"][1] - a[1])
+t = max(tasks, key=dist); s = t["start"]; g = wp[t["goal"]]
 sx, sy = lo[0] + (s[1] + 0.5) * res, lo[1] + (s[0] + 0.5) * res
 open(dst, "w").write(open(src).read().replace("START_X", f"{sx:.3f}").replace("START_Y", f"{sy:.3f}").replace("GOAL_X", f"{g['x']:.3f}").replace("GOAL_Y", f"{g['y']:.3f}").replace("GOAL_NAME", t["goal"]))
 print(f"start ({sx:.2f},{sy:.2f}) -> {t['goal']} ({g['x']},{g['y']})")
