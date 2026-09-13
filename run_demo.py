@@ -19,6 +19,7 @@ def main():
     ap.add_argument("--n-tasks", type=int, default=16)
     ap.add_argument("--frames", type=int, default=48, help="keyframes sent to VGGT (48 fits an A10G; up to ~80)")
     ap.add_argument("--project", type=str, default="cogmap")
+    ap.add_argument("--seed", type=int, default=0, help="task-set seed (synthetic world layout is fixed)")
     ap.add_argument("--no-viz", action="store_true")
     args = ap.parse_args()
     load_dotenv()
@@ -35,7 +36,7 @@ def main():
     else:
         world = make_synthetic_apartment()
         belief = BeliefMap.from_world(world, name="synthetic_apartment")
-        tasks = default_tasks(world, args.n_tasks)
+        tasks = default_tasks(world, args.n_tasks, seed=args.seed)
         perturbations = scripted_perturbations(world)
     loop = CogMapLoop(world, belief, tasks, out_dir=args.out, use_llm=not args.no_llm, use_patrols=not args.no_patrols,
                       use_explore=not args.no_explore)
