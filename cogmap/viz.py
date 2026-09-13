@@ -87,6 +87,15 @@ def _draw_frame(ax_b, ax_t, fr, title_extra=""):
                   bbox=dict(boxstyle="round,pad=0.15", fc="#2b2d42", ec="none", alpha=0.8))
     ax_b.set_title(f"belief map v{fr['version']}  (orange = volatility prior)", fontsize=9)
     ax_t.set_title("true world (agents' paths, red X = failures)" + title_extra, fontsize=9)
+    # crop both panels to the known region (scanned maps sit inside a large unknown margin)
+    known = (belief != UNKNOWN) | (true == FREE)
+    ys, xs = np.where(known)
+    if len(ys):
+        m = 4
+        r0, r1 = max(0, ys.min() - m), min(belief.shape[0] - 1, ys.max() + m)
+        c0, c1 = max(0, xs.min() - m), min(belief.shape[1] - 1, xs.max() + m)
+        for ax in (ax_b, ax_t):
+            ax.set_xlim(c0 - 0.5, c1 + 0.5); ax.set_ylim(r1 + 0.5, r0 - 0.5)
 
 
 def animate(out_dir: str, fps: int = 12, steps_per_frame: int = 4) -> Optional[str]:
