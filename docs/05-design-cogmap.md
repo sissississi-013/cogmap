@@ -24,3 +24,10 @@ Weave (traces, Evaluations, Leaderboard, video/image logging), W&B MCP server (r
 
 ## Hard cutoffs (PDT)
 04:30 skeleton+synthetic swarm+tests · 05:15 failure→rule repair→Weave curve · 06:00 LLM repair + volatility loop · 07:15 real scan end-to-end ≤10 min per video · 08:00 viz + dashboard · 08:30 README/submission/push · 09:00+ Sissi records venue → rerun → record demo.
+
+## As built (04:40 PDT, end of the overnight loop)
+- Three loops, all measured per map version in Weave: (1) self-correcting map (failures → rule repair + evidence-gated LLM ops), (2) self-improving swarm (volatility prior → patrols pre-empt changes; hard failures 25 → 2 → 1 on the office scan), (3) exploration (frontier scouts grow the map between changes; 2125 → 2595 known cells).
+- Real scans: VGGT-1B on Modal (A10G, ~6–12 s GPU) → occupancy grid; objects from gpt-5 vision or a local OWLv2 fallback (no API needed); nav2 export verified in a stock ROS 2 Humble map_server, and Nav2's NavFn planner plans on the map (docs/proof/).
+- Real change: `--rescan` registers a second walkthrough to the first map and turns the difference into the world change the loop repairs.
+- Named agents in traces: navigator_swarm, scout_patrol/scout_search_sweep/scout_frontier_targets, cartographer_rule_repair, reasoner_propose_ops, verifier_apply_ops, reflector_changelog/reflector_llm_postmortem.
+- Honest notes: LLM repair proposals were never needed (0 applied); the deterministic Cartographer explained every failure. Scale is up to a factor (camera height 1.4 m assumed). Unknown space beyond a 3-cell margin is treated as blocked in the simulated truth.
