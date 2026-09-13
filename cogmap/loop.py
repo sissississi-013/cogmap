@@ -16,7 +16,7 @@ from typing import Callable, Dict, List, Optional
 import weave
 
 from .agents import Swarm, summarize, pool_observations, EpisodeResult
-from .evals import evaluate_map, publish_leaderboard
+from .evals import evaluate_map, publish_leaderboard, weave_urls
 from .repair import rule_repair, llm_propose_ops, validate_and_apply_ops, patrol_targets, search_targets, reflect
 from .world import BeliefMap, TrueWorld, Cell
 
@@ -185,7 +185,8 @@ class CogMapLoop:
         changelog = reflect(self.belief.changelog, [r["story"] for r in rounds], self.timeline)
         with open(os.path.join(self.out_dir, "map_changelog.md"), "w") as f:
             f.write(changelog)
-        result = {"timeline": self.timeline, "rounds": rounds, "leaderboard": lb, "elapsed_s": round(time.time() - t0, 1)}
+        result = {"timeline": self.timeline, "rounds": rounds, "leaderboard": lb, "weave": weave_urls(),
+                  "n_tasks": len(self.tasks), "elapsed_s": round(time.time() - t0, 1)}
         with open(os.path.join(self.out_dir, "loop_result.json"), "w") as f:
             json.dump(result, f, indent=1)
         with open(os.path.join(self.out_dir, "frames.json"), "w") as f:

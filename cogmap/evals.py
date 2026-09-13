@@ -67,6 +67,18 @@ def evaluate_map(belief: BeliefMap, world: TrueWorld, tasks: List[dict], label: 
     return out
 
 
+def weave_urls(project: str = "cogmap") -> dict:
+    """Human-clickable Weave URLs for the README / dashboard."""
+    try:
+        client = weave.get_client()
+        entity, proj = client.entity, client.project
+    except Exception:  # noqa: BLE001
+        entity, proj = "sissiwang-maglev", project
+    base = f"https://wandb.ai/{entity}/{proj}/weave"
+    return {"project": base, "evaluations": f"{base}/evaluations", "leaderboard": f"{base}/leaderboards/cogmap-map-versions",
+            "traces": f"{base}/traces"}
+
+
 def publish_leaderboard(eval_refs: List[str], name: str = "cogmap-map-versions") -> Optional[str]:
     try:
         from weave.flow import leaderboard
