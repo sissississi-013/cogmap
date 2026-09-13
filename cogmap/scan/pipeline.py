@@ -9,7 +9,7 @@ import os
 import subprocess
 import sys
 import time
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import weave
@@ -102,13 +102,21 @@ def blobs_as_objects(grid: np.ndarray, existing: Dict[str, WorldObject], k: int 
     return out
 
 
-def reachable_tasks(world: TrueWorld, n: int = 12, seed: int = 0, min_dist: int = 8) -> List[dict]:
-    """Fixed task set on a real map: start cells in the main free component, goals reachable."""
+def reachable_tasks(world: TrueWorld, n: int = 12, seed: int = 0, min_dist: int = 8,
+                    belief: Optional[BeliefMap] = None) -> List[dict]:
+    """Fixed task set on a real map: starts in the main KNOWN-free component, goals reachable through known-free cells
+    of the belief (so a correct map yields 100% at v0 and every later failure is caused by a world change)."""
     from ..agents import goal_cells_for
     rng = np.random.default_rng(seed)
-    main = _largest_free_component(world.grid)
+    belief = belief if belief is not None else BeliefMap.from_world(world)
+    known = (belief.grid == FREE) & (world.grid == FREE)
+    lab, nlab = ndimage.label(known)
+    if nlab == 0:
+        return []
+    sizes = ndimage.sum(known, lab, range(1, nlab + 1))
+    main = lab == (int(np.argmax(sizes)) + 1)
     free = np.argwhere(main)
-    belief = BeliefMap.from_world(world)
+    known_free = lambda c: 0 <= c[0] < known.shape[0] and 0 <= c[1] < known.shape[1] and known[c]
     names = [nm for nm in world.objects if goal_cells_for(belief, nm)]
     tasks, tries = [], 0
     while len(tasks) < n and tries < 4000 and names:
@@ -119,7 +127,7 @@ def reachable_tasks(world: TrueWorld, n: int = 12, seed: int = 0, min_dist: int 
         a = world.objects[goal].anchor
         if abs(s[0] - a[0]) + abs(s[1] - a[1]) < min_dist:
             continue
-        if astar(world.is_free, s, goals, world.shape) is None:
+        if astar(known_free, s, goals, world.shape) is None:
             continue
         tasks.append({"id": f"t{len(tasks)}", "start": list(s), "goal": goal})
     return tasks
@@ -263,9 +271,9 @@ def scan_to_world(video: str, out_dir: str, n_frames: int = 48, cell: float = 0.
         belief.stamp_object(o, OCCUPIED, o.confidence)
     belief.save(os.path.join(sd, "belief_v0.json"))
     json.dump(world.to_json(), open(os.path.join(sd, "world.json"), "w"))
-    tasks = reachable_tasks(world, n=n_tasks)
+    tasks = reachable_tasks(world, n=n_tasks, belief=belief)
     if len(tasks) < 4:          # tiny or fragmented scan: relax the distance requirement
-        tasks = reachable_tasks(world, n=n_tasks, min_dist=3)
+        tasks = reachable_tasks(world, n=n_tasks, min_dist=3, belief=belief)
     if len(tasks) < 2:
         raise RuntimeError(f"Only {len(tasks)} reachable navigation tasks could be built from this scan "
                            f"(free cells={int((world.grid == FREE).sum())}, objects={len(objects)}). "

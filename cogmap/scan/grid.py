@@ -58,7 +58,9 @@ def build_grid(npz_path: str, cell: float = 0.15, camera_height_m: float = 1.4, 
         P = P[rng.choice(len(P), max_points, replace=False)]
 
     h_up = P @ mean_up
-    low = P[h_up < np.percentile(h_up, 30)]
+    low = P[h_up <= np.percentile(h_up, 30)]
+    if len(low) < 50:
+        low = P[np.argsort(h_up)[: max(50, len(P) // 10)]]
     n, ctr, n_inl = _ransac_plane(low)
     if n @ mean_up < 0:
         n = -n
