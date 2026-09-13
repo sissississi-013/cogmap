@@ -17,4 +17,5 @@ PY
 docker build -q -t cogmap-nav2 -f "$HERE/Dockerfile.nav2" "$HERE" >/dev/null
 mkdir -p "$RUN/nav2_proof"
 docker run --rm -v "$RUN/scan/nav2:/maps:ro" -v "$RUN/nav2_proof:/out" -v "$TMP/plan.sh:/plan.sh:ro" cogmap-nav2 bash /plan.sh | tee "$RUN/nav2_proof/planner.log"
+python3 "$HERE/draw_nav2_path.py" "$RUN" || true
 rm -rf "$TMP"

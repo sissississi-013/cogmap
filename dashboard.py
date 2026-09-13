@@ -61,6 +61,10 @@ def _(mo, os, run):
         if os.path.exists(os.path.join(scan, "nav2", "map.yaml")):
             items.append(mo.md("### Exported for a real robot (ROS 2 Nav2 map_server)"))
             items.append(mo.md("```yaml\n" + open(os.path.join(scan, "nav2", "map.yaml")).read() + "```"))
+        nav2png = os.path.join(run, "nav2_proof", "nav2_path.png")
+        if os.path.exists(nav2png):
+            items.append(mo.md("### Proof: a stock ROS 2 Nav2 planner planned on this map"))
+            items.append(mo.image(nav2png, width=520))
     mo.vstack(items) if items else mo.md("_synthetic run (no scan)_")
     return
 

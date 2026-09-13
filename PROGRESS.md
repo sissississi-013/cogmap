@@ -80,3 +80,4 @@
 - 04:16 Experiment running: Nav2 planner_server (NavFn) + static costmap on the exported map, asking /compute_path_to_pose from task t0's start to the bookshelf_2 waypoint (out/nav2_check/plan_log.txt).
 - 04:17 PROOF 2: Nav2 NavFn planner_server + static costmap plan a 178-pose path on the exported office map (Docker, cached image cogmap-nav2). scripts/nav2_plan.sh, docs/proof/nav2_planner.log. README/SUBMISSION/storyboard updated.
 - 04:18 Nav2 path captured (178 poses) and drawn on the map: docs/img/nav2_path.png, docs/proof/nav2_path.yaml.
+- 04:20 scripts/draw_nav2_path.py (path image per run), nav2_plan.sh draws it, run_venue.sh runs the Nav2 proof when Docker is up, dashboard shows it.

@@ -13,4 +13,5 @@ if [ -x spikes/genesis_sim/.venv/bin/python ]; then
   spikes/genesis_sim/.venv/bin/python -u cogmap/broll_genesis.py walk "$OUT/scan/belief_v0.json" "$OUT/scan/world.json" "$OUT/scan/tasks.json" "$OUT/go2_walk.mp4" cpu 2>&1 | grep -E "wrote|Error" || true
 fi
 scripts/make_reel.sh "$OUT" || true
+if docker info >/dev/null 2>&1; then echo "== Nav2 proof (ROS 2 planner on the exported map)"; scripts/nav2_plan.sh "$OUT" 2>&1 | grep -E "status|poses|nav2_path" || true; fi
 echo "== done ($(date +%H:%M:%S)). Open: $OUT/scan/scan_overview.png  $OUT/curve.png  $OUT/swarm.mp4  $OUT/scan/pointcloud.html  ->  marimo run dashboard.py"
