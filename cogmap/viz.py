@@ -190,3 +190,26 @@ def scan_overview(scan_dir: str, out_path: Optional[str] = None) -> str:
     out_path = out_path or os.path.join(scan_dir, "scan_overview.png")
     fig.tight_layout(); fig.savefig(out_path, dpi=130); plt.close(fig)
     return out_path
+
+
+
+def log_images_to_weave(out_dir: str) -> dict:
+    """Publish the run's key images as Weave objects (they render inline in the trace / object views)."""
+    import weave
+    from PIL import Image
+
+    @weave.op
+    def cogmap_run_images(run: str) -> dict:
+        imgs = {}
+        for name in ("curve.png", "steps_to_recover.png", os.path.join("scan", "scan_overview.png"), "snapshot_01.png"):
+            p = os.path.join(run, name)
+            if os.path.exists(p):
+                imgs[os.path.basename(name).replace(".png", "")] = Image.open(p).convert("RGB")
+        return imgs
+
+    out = cogmap_run_images(out_dir)
+    try:
+        weave.publish(out, name=f"cogmap-images-{os.path.basename(out_dir.rstrip('/'))}")
+    except Exception as e:  # noqa: BLE001
+        print("weave publish of images failed:", e)
+    return {k: v.size for k, v in out.items()}

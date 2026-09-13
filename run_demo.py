@@ -41,8 +41,9 @@ def main():
         print(f"  round {r['round']}: steps_to_recover={r['steps_to_recover']} repairs={r['repairs']} final={r['final_success']:.2f}")
     print("leaderboard:", result["leaderboard"])
     if not args.no_viz:
-        from cogmap.viz import render_all
+        from cogmap.viz import render_all, log_images_to_weave
         render_all(args.out)
+        print("weave images:", log_images_to_weave(args.out))
 
 
 if __name__ == "__main__":
