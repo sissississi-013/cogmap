@@ -127,7 +127,7 @@ class NavAgent:
         self.budget_slack = budget_slack
 
     def _unknown_cost(self, cell: Cell) -> float:
-        return 2.0 if self.belief.grid[cell] == UNKNOWN else 0.0
+        return 4.0 if self.belief.grid[cell] == UNKNOWN else 0.0
 
     def _plan(self, pos: Cell, goals: Set[Cell]):
         """Plan through known-free cells first; only if that fails, allow unknown cells (with a cost)."""

@@ -192,7 +192,7 @@ def auto_perturbations(world: TrueWorld, tasks: List[dict]) -> List[dict]:
 
 @weave.op
 def scan_to_world(video: str, out_dir: str, n_frames: int = 48, cell: float = 0.15, detect_every: int = 2,
-                  unknown_is_blocked: bool = True, n_tasks: int = 12) -> Tuple[TrueWorld, BeliefMap, List[dict], List[dict]]:
+                  unknown_is_blocked: bool = True, n_tasks: int = 12, floor_margin: int = 3) -> Tuple[TrueWorld, BeliefMap, List[dict], List[dict]]:
     sd = os.path.join(out_dir, "scan")
     os.makedirs(sd, exist_ok=True)
     t0 = time.time()
@@ -241,7 +241,12 @@ def scan_to_world(video: str, out_dir: str, n_frames: int = 48, cell: float = 0.
             if 0 <= c[0] < static.shape[0] and 0 <= c[1] < static.shape[1]:
                 static[c] = FREE   # object footprints are stamped by TrueWorld; keep static = walls/unknown only
     if unknown_is_blocked:
-        static[static == UNKNOWN] = OCCUPIED
+        # The phone only saw part of the floor. In the simulated ground truth, unknown cells within `floor_margin` cells
+        # of seen floor are real floor (rooms are bigger than the scan); unknown cells further away are walls/unreachable.
+        near_floor = ndimage.binary_dilation(static == FREE, iterations=floor_margin)
+        unknown = static == UNKNOWN
+        static[unknown & near_floor] = FREE
+        static[unknown & ~near_floor] = OCCUPIED
     world = TrueWorld(static, objects, name=os.path.splitext(os.path.basename(video))[0])
     # belief: exactly what the scan says (keeps UNKNOWN cells unknown -> agents may try and learn)
     belief_grid = grid.copy()
