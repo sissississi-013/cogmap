@@ -1,0 +1,3 @@
+FROM public.ecr.aws/docker/library/ros:humble-ros-base
+RUN apt-get update -qq && apt-get install -y -qq ros-humble-nav2-map-server ros-humble-nav2-planner ros-humble-nav2-lifecycle-manager \
+    ros-humble-nav2-costmap-2d ros-humble-nav2-navfn-planner ros-humble-tf2-ros python3-yaml >/dev/null 2>&1 && rm -rf /var/lib/apt/lists/*
