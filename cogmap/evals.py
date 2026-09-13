@@ -64,6 +64,10 @@ def evaluate_map(belief: BeliefMap, world: TrueWorld, tasks: List[dict], label: 
         out["eval_ref"] = weave.publish(ev, name=f"eval-{label}").uri()
     except Exception:  # noqa: BLE001
         out["eval_ref"] = None
+    try:  # the map itself, versioned in Weave (judges can diff v_k vs v_{k+1})
+        out["map_ref"] = weave.publish(belief.to_json(), name=f"map-{belief.name}").uri()
+    except Exception:  # noqa: BLE001
+        out["map_ref"] = None
     try:  # clickable URL of this evaluation's trace
         client = weave.get_client()
         calls = list(client.get_calls(filter={"op_names": [f"weave:///{client.entity}/{client.project}/op/Evaluation.evaluate:*"]},
