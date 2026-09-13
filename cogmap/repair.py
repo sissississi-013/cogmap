@@ -343,3 +343,33 @@ def llm_reflect(rounds: List[dict], timeline: List[dict]) -> str:
     except Exception:  # noqa: BLE001
         text = raw
     return f"## Reflector post-mortem ({used})\n\n" + text.strip()
+
+
+@weave.op(name="scout_frontier_targets")
+def frontier_targets(belief_json: dict, n: int = 8, min_gap: int = 4) -> List[List[int]]:
+    """Frontier exploration (Yamauchi): known-free cells adjacent to unknown cells, spread out, largest frontiers first."""
+    b = BeliefMap.from_json(belief_json)
+    free = b.grid == FREE
+    unknown = b.grid == UNKNOWN
+    near_unknown = ndimage.binary_dilation(unknown, iterations=1)
+    frontier = free & near_unknown
+    if not frontier.any():
+        return []
+    lab, nlab = ndimage.label(frontier, structure=np.ones((3, 3)))
+    sizes = ndimage.sum(frontier, lab, range(1, nlab + 1))
+    order = np.argsort(-sizes)
+    targets: List[List[int]] = []
+    for idx in order:
+        if len(targets) >= n or sizes[idx] < 2:
+            break
+        cells = np.argwhere(lab == idx + 1)
+        c = cells[len(cells) // 2]
+        if all(abs(int(c[0]) - t[0]) + abs(int(c[1]) - t[1]) >= min_gap for t in targets):
+            targets.append([int(c[0]), int(c[1])])
+    return targets
+
+
+def coverage(belief_json: dict) -> dict:
+    g = np.array(belief_json["grid"])
+    known = int((g != UNKNOWN).sum())
+    return {"known_cells": known, "free_cells": int((g == FREE).sum()), "unknown_cells": int((g == UNKNOWN).sum())}

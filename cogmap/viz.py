@@ -32,6 +32,13 @@ def plot_curve(out_dir: str) -> str:
         if m.get("phase") == "after_change":
             ax.axvline(i, color="#d62728", alpha=0.25, lw=8)
             ax.text(i, 1.06, f"change {m.get('round')}", ha="center", fontsize=8, color="#d62728")
+    known = [m.get("known_cells") for m in tl]
+    if all(k is not None for k in known) and max(known) > min(known):
+        ax2 = ax.twinx()
+        ax2.plot(x, known, ":", color="#2ca02c", lw=1.5, marker="^", ms=4, label="map cells known (exploration)")
+        ax2.set_ylabel("known cells", color="#2ca02c", fontsize=8)
+        ax2.tick_params(axis="y", labelsize=7, colors="#2ca02c")
+        ax2.legend(loc="lower right", fontsize=8)
     ax.set_xticks(x)
     ax.set_xticklabels([l.replace("-", "\n", 1) for l in labels], fontsize=7)
     ax.set_ylim(0, 1.12)

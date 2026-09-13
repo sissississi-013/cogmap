@@ -17,7 +17,7 @@ import weave
 
 from .agents import Swarm, summarize, pool_observations, EpisodeResult
 from .evals import evaluate_map, publish_leaderboard, weave_urls
-from .repair import rule_repair, llm_propose_ops, validate_and_apply_ops, patrol_targets, search_targets, reflect, llm_reflect
+from .repair import rule_repair, llm_propose_ops, validate_and_apply_ops, patrol_targets, search_targets, reflect, llm_reflect, frontier_targets, coverage
 from .world import BeliefMap, TrueWorld, Cell
 
 
@@ -72,11 +72,11 @@ def repair_map(belief_json: dict, swarm_out: dict, use_llm: bool = True, extra_o
 class CogMapLoop:
     def __init__(self, world: TrueWorld, belief: BeliefMap, tasks: List[dict], out_dir: str = "out",
                  use_llm: bool = True, use_patrols: bool = True, recover_threshold: float = 0.85,
-                 max_repairs_per_round: int = 3, n_agents: int = 8):
+                 max_repairs_per_round: int = 3, n_agents: int = 8, use_explore: bool = True):
         self.world, self.belief, self.tasks = world, belief, tasks
         self.out_dir = out_dir
         os.makedirs(out_dir, exist_ok=True)
-        self.use_llm, self.use_patrols = use_llm, use_patrols
+        self.use_llm, self.use_patrols, self.use_explore = use_llm, use_patrols, use_explore
         self.recover_threshold = recover_threshold
         self.max_repairs_per_round = max_repairs_per_round
         self.n_agents = n_agents
@@ -88,6 +88,7 @@ class CogMapLoop:
     def _eval(self, label: str, story: str = "", extra: Optional[dict] = None) -> dict:
         m = evaluate_map(self.belief, self.world, self.tasks, label, story)
         m.update(extra or {})
+        m.update(coverage(self.belief.to_json()))
         if m.get("eval_ref"):
             self.eval_refs.append(m["eval_ref"])
         self.timeline.append(m)
@@ -135,12 +136,26 @@ class CogMapLoop:
             extra_obs = None
             patrol_path = None
             patrol_preempted, patrol_cells = False, 0
+            explored = 0
+            if self.use_explore:
+                ft = frontier_targets(self.belief.to_json())
+                if ft:
+                    er = run_patrols(self.belief.to_json(), self.world.to_json(), ft, list(self.patrol_start))
+                    steps_to_recover += er["steps"]
+                    before = coverage(self.belief.to_json())["known_cells"]
+                    rep = rule_repair(self.belief.to_json(), [], er["observations"])
+                    self.belief = BeliefMap.from_json(rep["belief"])
+                    explored = coverage(self.belief.to_json())["known_cells"] - before
+                    extra_obs = dict(er["observations"])
+                    print(f"  explore: {len(ft)} frontier targets, {er['steps']} steps, +{explored} cells learned -> v{self.belief.version}")
             if self.use_patrols and i > 1:
                 targets = patrol_targets(self.belief.to_json())
                 if targets:
                     pr = run_patrols(self.belief.to_json(), self.world.to_json(), targets, list(self.patrol_start))
                     steps_to_recover += pr["steps"]
-                    extra_obs = pr["observations"]
+                    extra_obs = dict(extra_obs or {})
+                    for kk, vv in pr["observations"].items():
+                        extra_obs.setdefault(kk, []).extend(vv)
                     patrol_path = pr["path"]
                     if pr["failures"]:
                         patrol_preempted, patrol_cells = True, len(pr["failures"])
@@ -192,7 +207,8 @@ class CogMapLoop:
                            "steps_to_recover": steps_to_recover, "final_success": m["success_rate"],
                            "map_version": self.belief.version, "rule_ops": rule_ops_n,
                            "llm_ops_applied": llm_applied, "llm_ops_rejected": llm_rejected,
-                           "patrol_preempted": patrol_preempted, "patrol_changed_cells": patrol_cells})
+                           "patrol_preempted": patrol_preempted, "patrol_changed_cells": patrol_cells,
+                           "cells_learned_by_exploration": explored})
             print(f"  round {i} done: success={m['success_rate']:.2f} steps_to_recover={steps_to_recover} repairs={n_rep}")
         lb = publish_leaderboard(self.eval_refs)
         changelog = reflect(self.belief.changelog, [r["story"] for r in rounds], self.timeline)

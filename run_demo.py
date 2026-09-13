@@ -14,6 +14,7 @@ def main():
     ap.add_argument("--out", type=str, default="out")
     ap.add_argument("--no-llm", action="store_true")
     ap.add_argument("--no-patrols", action="store_true")
+    ap.add_argument("--no-explore", action="store_true")
     ap.add_argument("--n-tasks", type=int, default=16)
     ap.add_argument("--frames", type=int, default=48, help="keyframes sent to VGGT (48 fits an A10G; up to ~80)")
     ap.add_argument("--project", type=str, default="cogmap")
@@ -32,7 +33,8 @@ def main():
         belief = BeliefMap.from_world(world, name="synthetic_apartment")
         tasks = default_tasks(world, args.n_tasks)
         perturbations = scripted_perturbations(world)
-    loop = CogMapLoop(world, belief, tasks, out_dir=args.out, use_llm=not args.no_llm, use_patrols=not args.no_patrols)
+    loop = CogMapLoop(world, belief, tasks, out_dir=args.out, use_llm=not args.no_llm, use_patrols=not args.no_patrols,
+                      use_explore=not args.no_explore)
     result = loop.run(perturbations)
     print("\n=== TIMELINE")
     for m in result["timeline"]:
