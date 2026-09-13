@@ -102,7 +102,7 @@ leaderboard; see below.
 In the office run, rounds 2 and 3 were caught by the patrols (the outer loop): the volatility prior sent verification agents
 to the cells that changed before, they saw the difference, and the map was repaired *before* the task swarm ran.
 
-<p align="center"><img src="docs/img/tum_curve.png" width="70%"></p>
+<p align="center"><img src="docs/img/tum_curve.png" width="58%"> <img src="docs/img/tum_steps.png" width="40%"></p>
 
 ### Ablation (synthetic apartment): what each part of the loop buys
 
@@ -172,8 +172,10 @@ run_demo.py     CLI · dashboard.py  marimo · tests/  pytest
 ## Sponsor tools
 
 - **W&B Weave** — `weave.init("cogmap")`; `@weave.op` on every agent step (swarm runs, patrols, rule repair, LLM proposals,
-  validation, scan stages); `weave.Evaluation` per map version with custom scorers; `weave.publish` of a `Leaderboard`;
-  the Weave MCP server is registered in Claude Code so the coding agent could inspect traces while building.
+  validation, scan stages); `weave.Evaluation` per map version with custom scorers (success, SPL, collisions, failures);
+  `weave.publish` of a `Leaderboard` over map versions and of the run's images (curve, scan overview, snapshots) as Weave
+  objects; every evaluation's trace URL is written into `loop_result.json`; the Weave MCP server is registered in Claude
+  Code so the coding agent could inspect traces while building.
 - **Modal** — GPU reconstruction (VGGT-1B on A10G) as a deployed app with a warm container.
 - **marimo** — `dashboard.py` results dashboard.
 - **OpenAI / Anthropic** — repair agent (`gpt-5` with JSON output; Claude when `ANTHROPIC_API_KEY` is valid) and VLM detector.
