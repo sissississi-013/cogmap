@@ -12,4 +12,5 @@ if [ -x spikes/genesis_sim/.venv/bin/python ]; then
   echo "== Go2 B-roll (walks an A* path on the scanned map)"
   spikes/genesis_sim/.venv/bin/python -u cogmap/broll_genesis.py walk "$OUT/scan/belief_v0.json" "$OUT/scan/world.json" "$OUT/scan/tasks.json" "$OUT/go2_walk.mp4" cpu 2>&1 | grep -E "wrote|Error" || true
 fi
+scripts/make_reel.sh "$OUT" || true
 echo "== done ($(date +%H:%M:%S)). Open: $OUT/scan/scan_overview.png  $OUT/curve.png  $OUT/swarm.mp4  $OUT/scan/pointcloud.html  ->  marimo run dashboard.py"

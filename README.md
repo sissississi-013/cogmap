@@ -156,6 +156,7 @@ is removed before any task runs (0 repairs, 574 steps vs 519 steps for a full ta
 | human-readable changelog | `out/<run>/map_changelog.md` |
 | robot artifact | `out/<run>/scan/nav2/map.pgm`, `map.yaml`, `waypoints.json` |
 | dashboard | `marimo run dashboard.py` |
+| 40-second B-roll reel (overview → swarm → curves → Go2) | `scripts/make_reel.sh out/<run>` → `out/<run>/reel.mp4` |
 
 ## Run it
 
@@ -201,8 +202,9 @@ run_demo.py     CLI · dashboard.py  marimo · tests/  pytest
 - **W&B Weave** — `weave.init("cogmap")`; `@weave.op` on every agent step (swarm runs, patrols, rule repair, LLM proposals,
   validation, scan stages); `weave.Evaluation` per map version with custom scorers (success, SPL, collisions, failures);
   `weave.publish` of a `Leaderboard` over map versions and of the run's images (curve, scan overview, snapshots) as Weave
-  objects; every evaluation's trace URL is written into `loop_result.json`; the Weave MCP server is registered in Claude
-  Code so the coding agent could inspect traces while building.
+  objects; every evaluation's trace URL is written into `loop_result.json`; two Leaderboards (`cogmap-map-versions`:
+  versions within a run; `cogmap-policies`: final maps of full loop vs rule-only ablation across scans); the Weave MCP
+  server is registered in Claude Code so the coding agent could inspect traces while building.
 - **Modal** — GPU reconstruction (VGGT-1B on A10G) as a deployed app with a warm container.
 - **marimo** — `dashboard.py` results dashboard.
 - **OpenAI / Anthropic** — repair agent (`gpt-5` with JSON output; Claude when `ANTHROPIC_API_KEY` is valid) and VLM detector.

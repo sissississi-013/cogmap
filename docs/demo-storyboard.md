@@ -18,6 +18,9 @@ Everything below is a file you open or a command you run. Record with QuickTime 
 Same order; add 30 s at the start recording the venue walkthrough on the phone earlier that morning and 20 s of Q&A buffer.
 One slide max: the two-loop diagram from README.md.
 
+## If short on time
+`out/<run>/reel.mp4` (made by `run_venue.sh`) is a silent 40-second B-roll of everything above; record a voice-over on it.
+
 ## Files to have open before you start
 - `out/<run>/scan/scan_overview.png`, `out/<run>/scan/pointcloud.html`, `out/<run>/scan/nav2/map.yaml`
 - `out/<run>/swarm.mp4`, `out/<run>/curve.png`, `out/<run>/steps_to_recover.png`, `out/<run>/go2_on_map.mp4`
