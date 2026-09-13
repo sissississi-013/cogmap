@@ -15,7 +15,10 @@ def _():
 def _(glob, mo, os):
     runs = sorted([d for d in glob.glob("out/*") if os.path.exists(os.path.join(d, "loop_result.json"))],
                   key=os.path.getmtime, reverse=True)
-    run_sel = mo.ui.dropdown(options=runs, value=runs[0] if runs else None, label="run")
+    def richness(d):  # prefer runs that have a real scan, visuals, Nav2 proof
+        return sum(os.path.exists(os.path.join(d, f)) for f in ("scan/scan_overview.png", "curve.png", "swarm.mp4", "nav2_proof/nav2_path.png", "go2_walk.mp4"))
+    default = max(runs, key=richness) if runs else None
+    run_sel = mo.ui.dropdown(options=runs, value=default, label="run")
     mo.vstack([mo.md("# CogMap — self-repairing cognitive maps for robots"),
                mo.md("Phone walkthrough → world model → simulated swarm learns to navigate → the world changes → "
                      "the swarm's failures repair the map → success recovers. Every map version is a W&B Weave evaluation."),
