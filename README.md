@@ -240,6 +240,13 @@ run_demo.py     CLI · dashboard.py  marimo · tests/  pytest
 
   <p align="center"><img src="docs/img/nav2_map.png" width="46%"> <img src="docs/img/nav2_path.png" width="46%"><br><sub>Left: the exported map.pgm with the named waypoints, exactly as map_server publishes it. Right: the path Nav2's NavFn planner computed on it (start → bookshelf_2), raw result in <code>docs/proof/nav2_path.yaml</code>.</sub></p>
 
+## How this was built (transparency)
+Built solo at the hackathon in one overnight session by Sissi directing Claude Code in a Ralph loop. The research that
+picked this idea over two alternatives is in `docs/research-*.md` and `docs/04-decision.md`; the loop prompt is
+`PROMPT.md`; the time-stamped build log with every dead end (stale ffmpeg, invalid Anthropic key, exhausted OpenAI
+credits, a perturbation that disconnected the apartment, agents planning through unknown space) is `PROGRESS.md`.
+Feasibility spikes for VGGT-on-Modal and Genesis are in `spikes/`.
+
 ## Prior work we build on
 
 VGGT (Wang et al., CVPR 2025), ConceptGraphs / VLMaps (open-vocabulary semantic maps), GraphPad and the
