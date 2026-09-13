@@ -13,3 +13,9 @@ wandb/
 *.mp3
 *.wav
 !demo/assets/*.mp4
+spikes/*/out/
+spikes/*/frames/
+spikes/*/.venv/
+*.npz
+*.pgm
+out/

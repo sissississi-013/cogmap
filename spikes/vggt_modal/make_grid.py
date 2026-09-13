@@ -26,8 +26,9 @@ mean_up = cam_up_world.mean(0); mean_up /= np.linalg.norm(mean_up)
 # ---- confidence filter
 P = pts.reshape(-1, 3); C = conf.reshape(-1)
 finite = np.isfinite(P).all(1)
-thr = max(np.percentile(C[finite], 50), 1.5)     # keep upper half, at least conf>1.5 (VGGT conf is ~1+)
-keep = finite & (C >= thr)
+thr = np.percentile(C[finite], 50)               # keep upper half by confidence (VGGT conf is >=1; static clips stay near 1.0)
+keep = finite & (C > thr)
+if keep.sum() < 0.1 * finite.sum(): keep = finite & (C >= thr)   # all-tied confidences: keep everything
 P = P[keep]
 print(f"kept {keep.sum()}/{keep.size} points (conf >= {thr:.2f})")
 if len(P) > 400_000:
@@ -75,7 +76,12 @@ cam_l = (cam_c - ctr) @ Rw.T
 
 # ---- scale: VGGT is up to scale. Normalise so median camera height above floor = 1.4 m
 cam_h = np.median(cam_l[:, 2])
-scale = 1.4 / cam_h if cam_h > 1e-6 else 1.0
+extent = np.percentile(np.linalg.norm(Pl[:, :2] - np.median(Pl[:, :2], 0), axis=1), 95)
+if cam_h > 0.05 * extent:
+    scale = 1.4 / cam_h
+else:  # camera-height estimate unusable (e.g. floor not visible / camera static): fall back to "scene radius ~= 3 m"
+    scale = 3.0 / extent
+    print(f"  camera-height scale unusable (cam_h={cam_h:.3f}, extent={extent:.3f}); falling back to scene-extent scale")
 print(f"median camera height (raw units) = {cam_h:.3f} -> scale factor {scale:.3f} (assumes camera ~1.4 m above floor)")
 Pl *= scale; cam_l *= scale
 
@@ -85,7 +91,7 @@ hz = Pl[:, 2]
 floor_m = (hz > -0.15) & (hz < 0.15)
 obst_m = (hz >= 0.15) & (hz <= 1.8)
 xy = Pl[:, :2]
-lo = np.percentile(xy, 1, axis=0) - 0.5; hi = np.percentile(xy, 99, axis=0) + 0.5
+lo = np.minimum(np.percentile(xy, 1, axis=0), cam_l[:, :2].min(0)) - 0.5; hi = np.maximum(np.percentile(xy, 99, axis=0), cam_l[:, :2].max(0)) + 0.5
 inb = (xy[:, 0] >= lo[0]) & (xy[:, 0] < hi[0]) & (xy[:, 1] >= lo[1]) & (xy[:, 1] < hi[1])
 nx, ny = (np.ceil((hi - lo) / cell)).astype(int)
 def to_cell(p): return ((p - lo) / cell).astype(int)
@@ -131,6 +137,6 @@ ax.set_xlabel("x (m)"); ax.set_ylabel("y (m)"); ax.legend(); ax.set_title("Occup
 fig.savefig(os.path.join(out_dir, "grid_with_trajectory.png"), dpi=120, bbox_inches="tight"); plt.close(fig)
 
 # ---- one depth preview for sanity
-dep = d["depth"][0].astype(np.float32); dep = (255 * (dep - dep.min()) / (dep.ptp() + 1e-9)).astype(np.uint8)
+dep = d["depth"][0].astype(np.float32); dep = (255 * (dep - dep.min()) / (np.ptp(dep) + 1e-9)).astype(np.uint8)
 cv2.imwrite(os.path.join(out_dir, "depth_frame0.png"), np.hstack([cv2.cvtColor(d["images"][0], cv2.COLOR_RGB2BGR), cv2.applyColorMap(dep, cv2.COLORMAP_TURBO)]))
 print("wrote", sorted(os.listdir(out_dir)))
