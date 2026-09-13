@@ -71,3 +71,4 @@
 ## 04:08 PDT (iteration 9, cont.)
 - Weave leaderboard `cogmap-policies` (final maps: full loop vs rule-only, office + living room). GitHub Actions CI (pytest) + Dockerfile. scripts/make_reel.sh → out/office/reel.mp4 (40 s B-roll), wired into run_venue.sh; storyboard mentions it.
 - 04:06 CI green on GitHub Actions (pytest, 11 tests). README badge added.
+- 04:08 Map versions published as Weave objects (map-<name>); README renders on GitHub (mermaid, GIF, images verified via API). Verifying with out/synth_check; Go2 walk re-render (lower blocks, calmer camera) for the office reel.

@@ -110,7 +110,7 @@ def walk_path(belief_path: str, world_path: str, tasks_path: str, out: str, back
     r0, c0 = ys.min(), xs.min()
     g = grid[ys.min():ys.max()+1, xs.min():xs.max()+1]
     HS, VS = 0.15, 0.01
-    hf = np.round(np.where(g == 2, 0.30, 0.0) / VS).astype(np.int32)
+    hf = np.round(np.where(g == 2, 0.20, 0.0) / VS).astype(np.int32)
     gs.init(backend=getattr(gs, backend), logging_level="warning")
     scene = gs.Scene(sim_options=gs.options.SimOptions(dt=0.01, substeps=2),
                      vis_options=gs.options.VisOptions(shadow=True, show_world_frame=False), show_viewer=False)
@@ -142,8 +142,8 @@ def walk_path(belief_path: str, world_path: str, tasks_path: str, out: str, back
             q[3 * k + 1] += 0.25 * lift; q[3 * k + 2] -= 0.40 * lift
         robot.control_dofs_position(q, dofs)
         scene.step()
-        ang = -0.6 + 0.0015 * i
-        cam.set_pose(pos=p + np.array([2.4 * np.cos(ang), 2.4 * np.sin(ang), 1.6]), lookat=p + np.array([0, 0, 0.1]))
+        ang = -0.8 + 0.0008 * i
+        cam.set_pose(pos=p + np.array([3.0 * np.cos(ang), 3.0 * np.sin(ang), 2.2]), lookat=p + np.array([0, 0, 0.1]))
     cam.stop_recording()
     print(f"wrote {out}: Go2 walked {len(path)} cells to {goal_name}")
 
