@@ -24,7 +24,11 @@ map is exported as the ROS 2 Nav2 artifact real robots (Unitree Go2/G1 stacks) l
   before tasks run. On the office map the hard failures the swarm hits right after each change go 25 → 2 → 1 across
   three changes, because rounds 2 and 3 were caught by patrols before the task swarm ran. A search sweep finds objects
   that went missing and re-identifies them by footprint.
-- **Observable:** every step is a `@weave.op`; each map version is a `weave.Evaluation` (`map_v{k}`); a Weave Leaderboard ranks versions.
+- **Exploration loop:** scouts push the frontier between changes; the map grows past what the phone saw (2125 → 2595 known cells).
+- **Real changes:** `--rescan` registers a second walkthrough (after furniture moved) to the first map and makes the
+  difference the world change the loop repairs (19 collisions → 2 repairs → 100%).
+- **Observable:** every step is a `@weave.op`; each map version is a `weave.Evaluation` (`map_v{k}`); Weave Leaderboards rank
+  versions and policies; map versions are published Weave objects.
 
 ## Sponsor tools & how they're used
 - **W&B Weave:** tracing of every agent step (swarm runs, patrols, rule/LLM repair, validation, scan stages), per-map-version
@@ -34,7 +38,9 @@ map is exported as the ROS 2 Nav2 artifact real robots (Unitree Go2/G1 stacks) l
 - **marimo:** `dashboard.py` results dashboard (curves, tables, scan overview, swarm video, changelog, Nav2 export).
 - **OpenAI gpt-5 (and Claude when a key is available):** VLM object detector for the scan, evidence-gated scene-graph
   repair proposals (0 applied in the reported runs: the deterministic repair covered every case; proposals without
-  observation support are rejected), and the Reflector post-mortem written into the map changelog.
+  observation support are rejected), and the Reflector post-mortem written into the map changelog. A local OWLv2
+  detector is the automatic fallback when no API credits are available.
+- **ROS 2 Nav2 (Docker):** the exported map loads in a stock `nav2_map_server` and NavFn plans a 143-pose path on it.
 - Protocols/frameworks: no A2A/MCP at runtime; MCP used at build time (W&B MCP server in Claude Code).
 
 ## Reproduce in one command
