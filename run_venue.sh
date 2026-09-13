@@ -7,7 +7,7 @@ source .venv/bin/activate
 set -a; source .env; set +a
 mkdir -p "$OUT"
 echo "== CogMap on $VIDEO -> $OUT  ($(date +%H:%M:%S))"
-python -u run_demo.py --video "$VIDEO" --out "$OUT" --n-tasks 12 2>&1 | tee "$OUT/log.txt" | grep -E "^\[scan\]|^\[eval\]|=== Round|round .* done|patrol detected|repair #|leaderboard|Traceback|weave images"
+python -u run_demo.py --video "$VIDEO" --out "$OUT" --n-tasks 12 2>&1 | tee "$OUT/log.txt" | grep --line-buffered -E "^\[scan\]|^\[eval\]|=== Round|round .* done|patrol detected|repair #|leaderboard|Traceback|weave images"
 if [ -x spikes/genesis_sim/.venv/bin/python ]; then
   echo "== Go2 B-roll"; spikes/genesis_sim/.venv/bin/python -u cogmap/broll_genesis.py "$OUT/scan/belief_v0.json" "$OUT/go2_on_map.mp4" cpu | tail -1 || true
 fi
