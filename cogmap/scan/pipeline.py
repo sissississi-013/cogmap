@@ -242,6 +242,7 @@ def scan_to_world(video: str, out_dir: str, n_frames: int = 48, cell: float = 0.
     for o in belief.objects.values():
         belief.stamp_object(o, OCCUPIED, o.confidence)
     belief.save(os.path.join(sd, "belief_v0.json"))
+    json.dump(world.to_json(), open(os.path.join(sd, "world.json"), "w"))
     tasks = reachable_tasks(world)
     perts = auto_perturbations(world, tasks)
     ex = export_nav2(belief, os.path.join(sd, "nav2"), resolution=cell, origin_xy=tuple(g["origin_xy"]))

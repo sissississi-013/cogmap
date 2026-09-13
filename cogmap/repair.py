@@ -124,6 +124,10 @@ Operations (JSON list), each one of:
   {"op":"rename","name":<existing>, "new_name":<better name>, "why":...}  # e.g. unknown_obstacle -> couch, if a removed object of the same size reappeared elsewhere
 Rules: only use cells inside the grid; never mark a cell free that robots observed occupied; prefer
 'rename' when a removed object's footprint size matches a new unknown obstacle (that's the object that moved).
+IMPORTANT: a deterministic rule-repair pass has ALREADY been applied to the map you receive (its ops are listed under
+rule_repair_applied). The failure log was recorded BEFORE that pass, so many failures are already explained. Do not undo
+rule-repair ops (e.g. do not remove an object it just re-identified/renamed). Every op you propose is validated against
+the robots' observations and rejected if unsupported, so propose only ops with evidence; an empty list is a fine answer.
 Respond with JSON: {"ops":[...], "summary": "<one sentence for the human changelog>"}"""
 
 
@@ -155,7 +159,7 @@ def _chat_json(system: str, user: str, model: Optional[str] = None) -> Tuple[str
 
 @weave.op
 def llm_propose_ops(belief_json: dict, failures: List[dict], removed: List[dict], added: List[dict],
-                    model: Optional[str] = None) -> dict:
+                    model: Optional[str] = None, rule_ops: Optional[List[dict]] = None) -> dict:
     """Ask an LLM for scene-graph ops. Returns {"ops": [...], "summary": str, "raw": str, "model": str}."""
     objs = {k: {"anchor": v["anchor"], "n_cells": len(v["cells"]), "kind": v["kind"]} for k, v in belief_json["objects"].items()}
     H = len(belief_json["grid"]); W = len(belief_json["grid"][0])
@@ -167,8 +171,8 @@ def llm_propose_ops(belief_json: dict, failures: List[dict], removed: List[dict]
         "grid_shape": [H, W],
         "objects": objs,
         "failures_grouped": dict(sorted(fail_summary.items(), key=lambda kv: -kv[1])[:40]),
-        "rule_repair_removed_objects": removed,
-        "rule_repair_added_unknown_obstacles": added,
+        "rule_repair_applied": {"removed_objects": removed, "added_unknown_obstacles": added,
+                                "other_ops": [o for o in (rule_ops or []) if o["op"] not in ("remove_object", "add_object")]},
     }, indent=1)
     raw, used = _chat_json(REPAIR_SYSTEM, user, model)
     try:
@@ -206,13 +210,22 @@ def validate_and_apply_ops(belief_json: dict, ops: List[dict], observations: Dic
                     raise ValueError("out of bounds")
                 if any(observed_free(c) for c in new_cells):
                     raise ValueError("target footprint observed free")
+                if not any(observed_occ(c) for c in new_cells):
+                    raise ValueError("no observation supports an object at the target")
+                if any(observed_occ(c) for c in o.cells) and not any(observed_free(c) for c in o.cells):
+                    raise ValueError("object still observed at its current location")
                 for c in o.cells:
                     if not observed_occ(c):
                         belief.set_cell(c, FREE, 0.7); changed.append(c)
                 o.cells = new_cells
                 belief.stamp_object(o, OCCUPIED, 0.75); changed += new_cells
             elif kind == "remove":
-                o = belief.objects.pop(op["name"])
+                o = belief.objects[op["name"]]
+                if any(observed_occ(c) for c in o.cells):
+                    raise ValueError("footprint still observed occupied")
+                if not any(observed_free(c) for c in o.cells):
+                    raise ValueError("no observation shows the object is gone")
+                belief.objects.pop(op["name"])
                 for c in o.cells:
                     if not observed_occ(c):
                         belief.set_cell(c, FREE, 0.7); changed.append(c)
@@ -220,6 +233,8 @@ def validate_and_apply_ops(belief_json: dict, ops: List[dict], observations: Dic
                 cells = [tuple(int(x) for x in c) for c in op["cells"]]
                 if not all(belief.in_bounds(c) for c in cells) or any(observed_free(c) for c in cells):
                     raise ValueError("cells invalid or observed free")
+                if not all(observed_occ(c) for c in cells):
+                    raise ValueError("every added cell must have been observed occupied")
                 belief.objects[op["name"]] = WorldObject(op["name"], cells, kind="obstacle", confidence=0.6)
                 belief.stamp_object(belief.objects[op["name"]], OCCUPIED, 0.7); changed += cells
             elif kind == "rename":

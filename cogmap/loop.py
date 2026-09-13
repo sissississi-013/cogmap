@@ -59,7 +59,7 @@ def repair_map(belief_json: dict, swarm_out: dict, use_llm: bool = True, extra_o
         removed = [o for o in rr["ops"] if o["op"] == "remove_object"]
         added = [o for o in rr["ops"] if o["op"] == "add_object"]
         try:
-            prop = llm_propose_ops(belief_json, failures, removed, added)
+            prop = llm_propose_ops(belief_json, failures, removed, added, rule_ops=rr["ops"])
             va = validate_and_apply_ops(belief_json, prop.get("ops", []), obs)
             belief_json = va["belief"]
             out["llm"] = {"summary": prop.get("summary"), "applied": va["applied"], "rejected": va["rejected"]}

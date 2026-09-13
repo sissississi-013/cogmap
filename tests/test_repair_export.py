@@ -46,6 +46,8 @@ def test_rule_repair_marks_blocked_door():
 def test_validate_rejects_ops_contradicting_observations():
     w = make_synthetic_apartment(); b = BeliefMap.from_world(w)
     obs = {json.dumps([20, 30]): [FREE, FREE], json.dumps([20, 31]): [FREE]}
+    for c in w.objects["shoe_rack"].cells:                  # robots saw the shoe rack's spot empty
+        obs[json.dumps([c[0], c[1]])] = [FREE]
     ops = [{"op": "add", "name": "ghost", "cells": [[20, 30], [20, 31]]},          # observed free -> reject
            {"op": "relocate", "name": "plant", "to": [2000, 2000]},                 # out of bounds -> reject
            {"op": "remove", "name": "shoe_rack"},                                   # fine
