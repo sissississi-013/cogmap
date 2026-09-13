@@ -155,6 +155,13 @@ is removed before any task runs (0 repairs, 574 steps vs 519 steps for a full ta
 
 <p align="center"><img src="docs/img/swarm.gif" width="90%"><br><sub>The loop on the TUM office scan, one command: v0 → desk dragged into the corridor (red X = collisions) → repaired → later changes caught by patrols (orange path).</sub></p>
 
+### Real changes, not only simulated ones (`--rescan`)
+Record the space again after moving something. CogMap registers the second scan to the first map (rotation/scale search
+with FFT cross-correlation of the occupied masks), takes the confident differences as the new ground truth, and runs the
+same loop: the swarm collides with what actually moved, and the map is repaired from those failures.
+`out/<run>/rescan/rescan_diff.png` shows map A, scan B aligned, and the red/green difference. Two independent
+reconstructions of the same office align at 354° with a 2-cell shift; the residual is reconstruction noise.
+
 ## What you see in the demo
 
 | stage | artifact |
@@ -181,6 +188,7 @@ python -m modal deploy cogmap/scan/vggt_modal.py
 
 python run_demo.py --synthetic            # synthetic apartment, 4 scripted world changes (~2 min)
 python run_demo.py --synthetic --no-llm --no-patrols --out out/ablation   # ablation flags
+python run_demo.py --video scan_a.mov --rescan scan_b.mov --out out/real   # REAL change: 2nd walkthrough after moving furniture
 python run_demo.py --video footage/raw/scan.mov   # real phone walkthrough (~5 min: VGGT ~1 min on an A10G, VLM ~1.5 min)
 marimo run dashboard.py                   # results dashboard
 python -m pytest tests -q
