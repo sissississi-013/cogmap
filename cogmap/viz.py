@@ -46,10 +46,19 @@ def plot_curve(out_dir: str) -> str:
     # steps-to-recover per round (outer-loop metric)
     rounds = res.get("rounds", [])
     if rounds:
-        fig, ax = plt.subplots(figsize=(5, 3.2))
-        ax.bar([f"round {r['round']}" for r in rounds], [r["steps_to_recover"] for r in rounds], color="#2ca02c")
-        ax.set_ylabel("agent steps until success recovered")
-        ax.set_title("Self-improving swarm: steps-to-recover per change")
+        # failures the task swarm hit right after each change (patrol rounds should push this toward 0)
+        fails = []
+        for r in rounds:
+            m = next((m for m in tl if m.get("round") == r["round"] and m.get("phase") == "after_change"), None)
+            fails.append(m.get("failures", 0) if m else 0)
+        fig, (a1, a2) = plt.subplots(1, 2, figsize=(9, 3.2))
+        labels = [f"round {r['round']}" for r in rounds]
+        a1.bar(labels, fails, color="#d62728")
+        a1.set_ylabel("task failures right after the change")
+        a1.set_title("Outer loop: failures the swarm still hits", fontsize=9)
+        a2.bar(labels, [r["steps_to_recover"] for r in rounds], color="#2ca02c")
+        a2.set_ylabel("agent steps until recovered")
+        a2.set_title("Cost of recovery (patrols + tasks + sweeps)", fontsize=9)
         fig.tight_layout()
         fig.savefig(os.path.join(out_dir, "steps_to_recover.png"), dpi=150)
         plt.close(fig)
