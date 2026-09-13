@@ -1,0 +1,35 @@
+== map.yaml
+image: map.pgm
+mode: trinary
+resolution: 0.15
+origin: [-9.221, -6.891, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+Transitioning successful
+Transitioning successful
+== /map (first 12 lines of one message)
+header:
+  stamp:
+    sec: 1789297914
+    nanosec: 370948226
+  frame_id: map
+info:
+  map_load_time:
+    sec: 1789297914
+    nanosec: 370946226
+  resolution: 0.15000000596046448
+  width: 112
+  height: 109
+  origin:
+    position:
+      x: -9.221
+      y: -6.891
+      z: 0.0
+    orientation:
+      x: 0.0
+      y: 0.0
+== map_server log
+[INFO] [1789297914.370898809] [map_io]: Read map /maps/map.pgm: 112 X 109 map @ 0.15 m/cell
+[INFO] [1789297916.175220352] [map_server]: Activating
+[INFO] [1789297916.175861435] [map_server]: Creating bond (map_server) to lifecycle manager.
