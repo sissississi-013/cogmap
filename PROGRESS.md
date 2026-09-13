@@ -38,3 +38,7 @@
 - out/lux (living room): 100% → armchair blocks corridor 88%/14 coll → 88%/0 → plant moved 69% → 94% → stale obstacle round: 94% (no drop). out/tum (TUM office): 100% → desk blocks corridor 75%/21 coll → 100% → desk_5 moved: patrol pre-empted → 94% → desk put back: patrol pre-empted → 94%. Viz rendered for both; images published to Weave; README real-scan tables added; docs/img/{lux,tum}_curve.png.
 - Perturbation blocker now = largest non-goal object (applies to future runs incl. the venue scan).
 - NEXT: Weave UI screenshots (Chrome) for docs; final clean end-to-end run; keep improving until 10:00.
+
+## 03:50 PDT (iteration 3, cont.)
+- Outer-loop evidence chart (failures at change: TUM 25 → 2 → 1) added to viz/README/SUBMISSION. Chrome extension not connected → Weave UI screenshots are on Sissi's morning checklist (docs/demo-storyboard.md).
+- Final from-scratch run in progress: out/final_lux (one command, fresh dir).

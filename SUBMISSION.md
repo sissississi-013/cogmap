@@ -16,9 +16,12 @@ map is exported as the ROS 2 Nav2 artifact real robots (Unitree Go2/G1 stacks) l
 
 ## What makes the loop self-improving
 - **Inner loop (self-correcting map):** plan on belief → execute in truth → failure events → repair → new map version →
-  re-evaluate on a fixed task set. Success: 100% → (couch moved) 75% → 100%; (doorway blocked) 62% → 94%.
-- **Outer loop (self-improving swarm):** repairs feed a per-cell volatility prior; patrols verify volatile cells before
-  tasks run, so a later stale-map change is caught pre-emptively (round 3: 0 task failures); a search sweep finds objects
+  re-evaluate on a fixed task set. Real office scan (TUM): a desk dragged into the busiest corridor takes success from
+  100% to 75% with 21 collisions; one repair pass brings it back to 100% with 0 collisions. Synthetic apartment: couch
+  moved 75% → 100%, doorway blocked 62% → 94%.
+- **Outer loop (self-improving swarm):** repairs feed a per-cell volatility prior; patrol agents verify volatile cells
+  before tasks run. On the office map the hard failures the swarm hits right after each change go 25 → 2 → 1 across
+  three changes, because rounds 2 and 3 were caught by patrols before the task swarm ran. A search sweep finds objects
   that went missing and re-identifies them by footprint.
 - **Observable:** every step is a `@weave.op`; each map version is a `weave.Evaluation` (`map_v{k}`); a Weave Leaderboard ranks versions.
 
