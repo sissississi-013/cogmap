@@ -73,3 +73,4 @@
 - 04:06 CI green on GitHub Actions (pytest, 11 tests). README badge added.
 - 04:08 Map versions published as Weave objects (map-<name>); README renders on GitHub (mermaid, GIF, images verified via API). Verifying with out/synth_check; Go2 walk re-render (lower blocks, calmer camera) for the office reel.
 - 04:10 Go2 walk re-rendered (20 cm blocks, calmer camera) → out/office/reel.mp4 rebuilt. tests/test_explore.py added (12 tests). Portrait clip full loop running (out/portrait).
+- 04:09 synth_check confirms end-to-end after latest changes (100/100/100/94%; patrol pre-empt in round 3); map versions published as Weave objects.
