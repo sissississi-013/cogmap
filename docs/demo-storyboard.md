@@ -31,8 +31,9 @@ One slide max: the two-loop diagram from README.md.
 0. **API credits (do this first).** At ~04:19 the OpenAI account returned `429 You have no credits remaining`. Without credits the
    scan still works but objects are unnamed blobs and the LLM repair/post-mortem are skipped. Either add OpenAI credits
    (https://platform.openai.com/settings/organization/billing) or put a valid `ANTHROPIC_API_KEY` in `.env` and run with
-   `COGMAP_LLM=anthropic`. A credit-free local detector (OWLv2, CPU) is the automatic fallback if it installed overnight
-   (`python -c "import transformers"`), so labels should still appear, just slower.
+   `COGMAP_LLM=anthropic`. A credit-free local detector (OWLv2, CPU) is installed and validated (12 labelled objects on the office scan in
+   58 s), and it kicks in automatically when the API fails, so labels will appear either way. Without credits you only
+   lose the LLM repair proposals (0 applied in all runs anyway) and the LLM post-mortem paragraph in the changelog.
 1. Record the venue: 60–90 s, slow, chest height, pan gently, include furniture; AirDrop → `footage/raw/venue.mov`.
 2. `./run_venue.sh footage/raw/venue.mov out/venue`  (does everything: scan, loop, visuals, B-roll)
    (≈2 min scan + ≈3 min loop). If VGGT is cold it takes ~60 s longer.
