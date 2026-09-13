@@ -48,13 +48,20 @@ def plot_curve(out_dir: str) -> str:
     if rounds:
         # failures the task swarm hit right after each change (patrol rounds should push this toward 0)
         fails = []
+        frames_path = os.path.join(out_dir, "frames.json")
+        frames = json.load(open(frames_path)) if os.path.exists(frames_path) else []
+        hard = {"blocked", "goal_missing", "no_path", "timeout"}
         for r in rounds:
-            m = next((m for m in tl if m.get("round") == r["round"] and m.get("phase") == "after_change"), None)
-            fails.append(m.get("failures", 0) if m else 0)
+            fr = next((f for f in frames if f["label"].startswith(f"round {r['round']}: world changed")), None)
+            if fr is not None:
+                fails.append(sum(1 for f in fr["failures"] if f["kind"] in hard))
+            else:
+                m = next((m for m in tl if m.get("round") == r["round"] and m.get("phase") == "after_change"), None)
+                fails.append(m.get("failures", 0) if m else 0)
         fig, (a1, a2) = plt.subplots(1, 2, figsize=(9, 3.2))
         labels = [f"round {r['round']}" for r in rounds]
         a1.bar(labels, fails, color="#d62728")
-        a1.set_ylabel("task failures right after the change")
+        a1.set_ylabel("collisions / missing goals / timeouts\nright after the change")
         a1.set_title("Outer loop: failures the swarm still hits", fontsize=9)
         a2.bar(labels, [r["steps_to_recover"] for r in rounds], color="#2ca02c")
         a2.set_ylabel("agent steps until recovered")
