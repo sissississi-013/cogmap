@@ -4,6 +4,15 @@
 > [![tests](https://github.com/sissississi-013/cogmap/actions/workflows/tests.yml/badge.svg)](https://github.com/sissississi-013/cogmap/actions/workflows/tests.yml)
 > Weave project: https://wandb.ai/sissiwang-maglev/cogmap/weave
 
+
+**TL;DR for judges**
+- **Input:** an 18–90 s phone walkthrough. **Output:** a cognitive map (grid + object graph), a swarm that navigates it, and a Nav2 map a real robot loads.
+- **Loop 1 (self-correcting):** world changes → robots fail → failures + observations repair the map → success recovers (100% → 75% → 100% on a real office scan).
+- **Loop 2 (self-improving):** repairs feed a volatility prior → patrols check volatile cells first → later changes are caught before any task fails (hard failures 25 → 2 → 1).
+- **Loop 3 (exploration):** scouts push the frontier between changes → the map grows past what the phone saw (2125 → 2595 known cells).
+- **Observable:** every map version is a Weave Evaluation; leaderboards, traces, published map objects. **Real:** the exported map loads in stock ROS 2 Nav2 and NavFn plans on it (`docs/proof/`).
+- **One command:** `./run_venue.sh <clip> out/<name>` (≈6 min) → curves, swarm video, Go2 sim clip, reel, dashboard.
+
 Walk through any space with your phone. **CogMap** turns the video into a cognitive map (a metric occupancy grid plus a
 semantic object graph), lets a swarm of simulated robots learn to navigate it, and when the world changes — someone
 moves the couch — the swarm's *failures* drive an automatic map repair so navigation success recovers. Across repeated
