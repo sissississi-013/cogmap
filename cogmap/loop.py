@@ -118,6 +118,10 @@ class CogMapLoop:
     @weave.op
     def run(self, perturbations: List[dict]) -> dict:
         t0 = time.time()
+        try:  # the fixed task set as a versioned Weave Dataset (what every map version is evaluated on)
+            weave.publish(weave.Dataset(name=f"cogmap-tasks-{self.belief.name}", rows=self.tasks))
+        except Exception as e:  # noqa: BLE001
+            print("dataset publish failed:", e)
         base = self._eval("v0-initial", "Initial cognitive map from the scan.")
         self.baseline = base
         self._snapshot("v0 initial map")

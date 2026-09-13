@@ -120,6 +120,8 @@ an unknown blob back to "couch") and it is gated by evidence, so it never makes 
 LLM proposal without observation support was rejected). The outer loop shows in round 3: with patrols, the stale obstacle
 is removed before any task runs (0 repairs, 574 steps vs 519 steps for a full task run + repair without patrols).
 
+<p align="center"><img src="docs/img/swarm.gif" width="90%"><br><sub>The loop on the TUM office scan, one command: v0 → desk dragged into the corridor (red X = collisions) → repaired → later changes caught by patrols (orange path).</sub></p>
+
 ## What you see in the demo
 
 | stage | artifact |
