@@ -45,6 +45,11 @@ flowchart LR
 3. Every function is a `@weave.op`; every map version is a Weave Evaluation named `map_v{k}`; a Weave Leaderboard ranks map
    versions.
 
+**The team, as it appears in the Weave traces:** `navigator_swarm` (task robots), `scout_patrol` / `scout_search_sweep`
+(verification and search agents driven by the volatility prior), `cartographer_rule_repair` (deterministic map surgery),
+`reasoner_propose_ops` (LLM scene-graph reasoning), `verifier_apply_ops` (evidence gate; rejects unsupported edits),
+`reflector_changelog` / `reflector_llm_postmortem` (human-readable memory of what changed and why).
+
 
 ## Results (synthetic apartment, 16 fixed tasks, 4 scripted world changes, LLM repair + patrols on)
 

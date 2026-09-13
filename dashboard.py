@@ -31,8 +31,9 @@ def _(json, mo, os, run_sel):
     rows = [{"map version": f"v{m['version']}", "label": m["label"], "success": f"{m['success_rate']:.0%}",
              "SPL": f"{m['spl']:.2f}", "collisions": int(m["collisions"]), "story": m.get("story", ""),
              "weave trace": m.get("weave_call_url", "")} for m in tl]
-    rounds = [{"round": r["round"], "story": r["story"], "repairs": r["repairs"], "steps to recover": r["steps_to_recover"],
-               "final success": f"{r['final_success']:.0%}"} for r in res["rounds"]]
+    rounds = [{"round": r["round"], "story": r["story"], "patrol caught it first": "yes" if r.get("patrol_preempted") else "no",
+               "repairs": r["repairs"], "rule ops": r.get("rule_ops", ""), "LLM ops applied / rejected": f"{r.get('llm_ops_applied', '')} / {r.get('llm_ops_rejected', '')}",
+               "steps to recover": r["steps_to_recover"], "final success": f"{r['final_success']:.0%}"} for r in res["rounds"]]
     lb = res.get("leaderboard")
     wv = res.get("weave", {"project": "https://wandb.ai/sissiwang-maglev/cogmap/weave"})
     links = "  ·  ".join(f"[Weave {k}]({v})" for k, v in wv.items())
