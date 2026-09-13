@@ -10,6 +10,7 @@ changes the swarm learns *where* the world tends to change and heals faster. The
 Nav2 robot (Unitree Go2/G1 stacks) loads today.
 
 <p align="center"><img src="docs/img/scan_overview.png" width="46%"> <img src="docs/img/curve.png" width="52%"></p>
+<p align="center"><sub>Left: cognitive map v0 built from an 18-second phone clip of a living room (VGGT point map → occupancy grid, VLM-labelled furniture anchored through the point map, phone path in red). Right: the synthetic-apartment loop — every red band is a world change, every recovery is a new map version evaluated in Weave.</sub></p>
 
 ## The loops (what makes it self-improving)
 
@@ -108,6 +109,7 @@ modal setup                               # once; then deploy the GPU reconstruc
 python -m modal deploy cogmap/scan/vggt_modal.py
 
 python run_demo.py --synthetic            # synthetic apartment, 4 scripted world changes (~2 min)
+python run_demo.py --synthetic --no-llm --no-patrols --out out/ablation   # ablation flags
 python run_demo.py --video footage/raw/scan.mov   # real phone walkthrough (~5 min: VGGT ~1 min on an A10G, VLM ~1.5 min)
 marimo run dashboard.py                   # results dashboard
 python -m pytest tests -q
