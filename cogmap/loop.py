@@ -149,6 +149,7 @@ class CogMapLoop:
             steps_to_recover += swarm_out["summary"]["steps"]
             self._snapshot(f"round {i}: world changed (map v{self.belief.version})", swarm_out, patrol_path)
             n_rep = 0
+            llm_applied, llm_rejected, rule_ops_n = 0, 0, 0
             prev = None
             while not self._recovered(m) and n_rep < self.max_repairs_per_round and (prev is None or self._better(m, prev)):
                 prev = m
@@ -168,6 +169,10 @@ class CogMapLoop:
                 changed = rep["rule_changed"] or (rep["llm"] and rep["llm"].get("applied"))
                 self.belief = BeliefMap.from_json(rep["belief"])
                 n_rep += 1
+                rule_ops_n += len(rep["rule_ops"])
+                if rep["llm"]:
+                    llm_applied += len(rep["llm"].get("applied", []) or [])
+                    llm_rejected += len(rep["llm"].get("rejected", []) or [])
                 print(f"  repair #{n_rep}: rule ops={rep['rule_ops']} llm={ (rep['llm'] or {}).get('summary') }")
                 if not changed:
                     print("  repair made no change; stopping this round")
@@ -179,7 +184,8 @@ class CogMapLoop:
                 self._snapshot(f"round {i}: repaired -> map v{self.belief.version}", swarm_out)
             rounds.append({"round": i, "story": story, "perturbation": info, "repairs": n_rep,
                            "steps_to_recover": steps_to_recover, "final_success": m["success_rate"],
-                           "map_version": self.belief.version})
+                           "map_version": self.belief.version, "rule_ops": rule_ops_n,
+                           "llm_ops_applied": llm_applied, "llm_ops_rejected": llm_rejected})
             print(f"  round {i} done: success={m['success_rate']:.2f} steps_to_recover={steps_to_recover} repairs={n_rep}")
         lb = publish_leaderboard(self.eval_refs)
         changelog = reflect(self.belief.changelog, [r["story"] for r in rounds], self.timeline)
