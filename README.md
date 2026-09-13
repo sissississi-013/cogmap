@@ -99,6 +99,8 @@ leaderboard; see below.
 | v3-repaired-2.1 | 94% | 0.88 | 0 | The desk_5 (goal of 3 tasks) was moved across the room to (61, 34). |
 | v4-after-change-3 | 94% | 0.88 | 0 | The desk was put back: the corridor is open again but the map still thinks it is |
 
+<p align="center"><img src="docs/img/tum_snapshot.png" width="90%"><br><sub>Office scan after the first repair: belief map (left, labels = object graph, orange = volatility prior) vs. the simulated true world with the swarm's paths and the collision that triggered the repair (right). Grey = never seen by the phone.</sub></p>
+
 In the office run, rounds 2 and 3 were caught by the patrols (the outer loop): the volatility prior sent verification agents
 to the cells that changed before, they saw the difference, and the map was repaired *before* the task swarm ran.
 
