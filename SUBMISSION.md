@@ -34,6 +34,11 @@ map is exported as the ROS 2 Nav2 artifact real robots (Unitree Go2/G1 stacks) l
 - **OpenAI gpt-5 (and Claude when a key is available):** repair agent (structured scene-graph ops) and VLM object detector.
 - Protocols/frameworks: no A2A/MCP at runtime; MCP used at build time (W&B MCP server in Claude Code).
 
+## Reproduce in one command
+`./run_venue.sh <phone_clip.mov> out/venue` → scan (VGGT on Modal + VLM objects) → loop (3 auto-generated world changes) →
+curve, swarm video, Nav2 export, Weave evaluations/leaderboard, Go2 B-roll. ~6 minutes. `marimo run dashboard.py` for the dashboard
+(a static export is in `out/dashboard.html`).
+
 ## 3-minute demo script
 0:00 Phone walkthrough clip (15 s) → "this is all the robot gets".
 0:20 `scan_overview.png` + 3D point cloud: grid, labeled furniture, phone path; `map.yaml` export on screen.

@@ -17,7 +17,7 @@ import weave
 
 from .agents import Swarm, summarize, pool_observations, EpisodeResult
 from .evals import evaluate_map, publish_leaderboard, weave_urls
-from .repair import rule_repair, llm_propose_ops, validate_and_apply_ops, patrol_targets, search_targets, reflect
+from .repair import rule_repair, llm_propose_ops, validate_and_apply_ops, patrol_targets, search_targets, reflect, llm_reflect
 from .world import BeliefMap, TrueWorld, Cell
 
 
@@ -25,7 +25,7 @@ def _obs_json(pooled: Dict[Cell, List[int]]) -> Dict[str, List[int]]:
     return {json.dumps([int(c[0]), int(c[1])]): v for c, v in pooled.items()}
 
 
-@weave.op
+@weave.op(name="navigator_swarm")
 def run_swarm(belief_json: dict, world_json: dict, tasks: List[dict], n_agents: int = 8) -> dict:
     world = TrueWorld.from_json(world_json)
     belief = BeliefMap.from_json(belief_json)
@@ -35,7 +35,7 @@ def run_swarm(belief_json: dict, world_json: dict, tasks: List[dict], n_agents: 
             "paths": [[list(c) for c in r.path] for r in results]}
 
 
-@weave.op
+@weave.op(name="scout_patrol")
 def run_patrols(belief_json: dict, world_json: dict, targets: List[List[int]], start: List[int]) -> dict:
     world = TrueWorld.from_json(world_json)
     belief = BeliefMap.from_json(belief_json)
@@ -44,7 +44,7 @@ def run_patrols(belief_json: dict, world_json: dict, targets: List[List[int]], s
             "failures": [f.to_json() for f in res.failures], "path": [list(c) for c in res.path]}
 
 
-@weave.op
+@weave.op(name="cartographer_repair")
 def repair_map(belief_json: dict, swarm_out: dict, use_llm: bool = True, extra_obs: Optional[dict] = None) -> dict:
     """One repair pass: rule repair, then (optionally) LLM scene-graph ops validated against observations."""
     obs = dict(swarm_out["observations"])
@@ -193,6 +193,10 @@ class CogMapLoop:
             print(f"  round {i} done: success={m['success_rate']:.2f} steps_to_recover={steps_to_recover} repairs={n_rep}")
         lb = publish_leaderboard(self.eval_refs)
         changelog = reflect(self.belief.changelog, [r["story"] for r in rounds], self.timeline)
+        try:
+            changelog += "\n\n" + llm_reflect(rounds, self.timeline)
+        except Exception as e:  # noqa: BLE001
+            print("llm reflect failed:", e)
         with open(os.path.join(self.out_dir, "map_changelog.md"), "w") as f:
             f.write(changelog)
         result = {"timeline": self.timeline, "rounds": rounds, "leaderboard": lb, "weave": weave_urls(),

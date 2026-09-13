@@ -34,7 +34,7 @@ def _consensus(vals: List[int]) -> Tuple[int, float]:
     return FREE, (len(vals) - occ) / len(vals)
 
 
-@weave.op
+@weave.op(name="cartographer_rule_repair")
 def rule_repair(belief_json: dict, results_json: List[dict], observations: Dict[str, List[int]], k: int = 1) -> dict:
     """Deterministic repair. Returns {"belief": new_belief_json, "ops": [...], "changed": n}."""
     belief = BeliefMap.from_json(belief_json)
@@ -170,7 +170,7 @@ def _chat_json(system: str, user: str, model: Optional[str] = None) -> Tuple[str
     raise RuntimeError("no LLM provider worked: " + " | ".join(errors))
 
 
-@weave.op
+@weave.op(name="reasoner_propose_ops")
 def llm_propose_ops(belief_json: dict, failures: List[dict], removed: List[dict], added: List[dict],
                     model: Optional[str] = None, rule_ops: Optional[List[dict]] = None) -> dict:
     """Ask an LLM for scene-graph ops. Returns {"ops": [...], "summary": str, "raw": str, "model": str}."""
@@ -198,7 +198,7 @@ def llm_propose_ops(belief_json: dict, failures: List[dict], removed: List[dict]
     return parsed
 
 
-@weave.op
+@weave.op(name="verifier_apply_ops")
 def validate_and_apply_ops(belief_json: dict, ops: List[dict], observations: Dict[str, List[int]]) -> dict:
     """Apply only ops consistent with observations. Returns {"belief":..., "applied":[...], "rejected":[...]}"""
     belief = BeliefMap.from_json(belief_json)
@@ -268,7 +268,7 @@ def validate_and_apply_ops(belief_json: dict, ops: List[dict], observations: Dic
 # Outer loop: volatility prior -> patrol targets
 # ---------------------------------------------------------------------------
 
-@weave.op
+@weave.op(name="scout_pick_targets")
 def patrol_targets(belief_json: dict, n: int = 6) -> List[List[int]]:
     """Cells the swarm should verify first: high volatility x low confidence, spread out."""
     b = BeliefMap.from_json(belief_json)
@@ -286,7 +286,7 @@ def patrol_targets(belief_json: dict, n: int = 6) -> List[List[int]]:
     return targets
 
 
-@weave.op
+@weave.op(name="reflector_changelog")
 def reflect(changelog: List[dict], round_stories: List[str], metrics: List[dict]) -> str:
     """Human-readable changelog (no LLM; deterministic so it always exists)."""
     lines = ["# CogMap changelog", ""]
@@ -300,7 +300,7 @@ def reflect(changelog: List[dict], round_stories: List[str], metrics: List[dict]
     return "\n".join(lines)
 
 
-@weave.op
+@weave.op(name="scout_search_sweep")
 def search_targets(belief_json: dict, observed_cells: List[List[int]], stride: int = 5, n: int = 60) -> List[List[int]]:
     """Coverage sweep targets for finding a missing object: a lattice of free cells not observed this round,
     visited in nearest-neighbour order (a cheap TSP tour)."""
@@ -319,3 +319,27 @@ def search_targets(belief_json: dict, observed_cells: List[List[int]], stride: i
         tour.append([nxt[0], nxt[1]])
         cur = nxt
     return tour
+
+
+REFLECT_SYSTEM = """You are the Reflector for a fleet of navigation robots that maintain a shared cognitive map.
+Given the per-round record (what changed in the world, how the swarm's success/collisions moved, how many repair passes,
+how many rule ops and LLM ops were applied/rejected, and whether a patrol caught the change before tasks ran), write a
+concise engineering post-mortem in Markdown: one short paragraph per round (what broke, what evidence the swarm collected,
+what the repair did, what it cost) and a final paragraph 'What the swarm learned' about where the world is volatile and
+what to patrol next. Be factual; do not invent numbers. Respond as JSON: {"markdown": "<the post-mortem in Markdown>"}"""
+
+
+@weave.op(name="reflector_llm_postmortem")
+def llm_reflect(rounds: List[dict], timeline: List[dict]) -> str:
+    slim_tl = [{k: v for k, v in m.items() if k in ("label", "version", "success_rate", "spl", "collisions", "failures", "round", "phase")}
+               for m in timeline]
+    slim_r = [{k: v for k, v in r.items() if k != "perturbation"} for r in rounds]
+    raw, used = _chat_json(REFLECT_SYSTEM, json.dumps({"rounds": slim_r, "timeline": slim_tl}, indent=1))
+    # _chat_json asks OpenAI for a JSON object; accept either a {"markdown": ...} object or plain text
+    try:
+        start, end = raw.find("{"), raw.rfind("}")
+        obj = json.loads(raw[start:end + 1])
+        text = obj.get("markdown") or obj.get("text") or obj.get("postmortem") or "\n".join(str(v) for v in obj.values())
+    except Exception:  # noqa: BLE001
+        text = raw
+    return f"## Reflector post-mortem ({used})\n\n" + text.strip()
