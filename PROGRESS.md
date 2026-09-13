@@ -50,3 +50,9 @@
 ## 03:56 PDT — morning script validated end-to-end (iteration 5)
 - `./run_venue.sh footage/tum/tum_room.mp4 out/venue_test` from a clean dir (all fixes): scan ≈2 min + loop ≈4 min + Go2 B-roll; v0 100% → desk blocks corridor 75%/31 coll → 100%/0 → desk moved: patrol pre-empted → 100% → stale obstacle: patrol pre-empted → 100%. Curve, swarm.mp4, Weave images, leaderboard all produced.
 - Loop results now record rule/LLM op counts per round. Viz crops to the known region on scanned maps.
+
+## 04:00 PDT — polish (iteration 5, cont.)
+- Weave ops now carry agent names (navigator_swarm, scout_patrol, scout_search_sweep, cartographer_rule_repair, reasoner_propose_ops, verifier_apply_ops, reflector_changelog, reflector_llm_postmortem); task set published as a Weave Dataset per run; LLM post-mortem appended to map_changelog.md (gpt-5); rounds record rule/LLM op counts + patrol pre-emption.
+- README: swarm GIF (docs/img/swarm.gif), office snapshot; SUBMISSION: one-command reproduction; out/dashboard.html static export.
+- Docker daemon not running → Nav2 map_server load test not possible here (format verified by unit test).
+- Validation run with all polish: out/synth_final (running).

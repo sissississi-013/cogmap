@@ -134,6 +134,7 @@ class CogMapLoop:
             # --- outer loop: patrol high-volatility cells BEFORE running tasks
             extra_obs = None
             patrol_path = None
+            patrol_preempted, patrol_cells = False, 0
             if self.use_patrols and i > 1:
                 targets = patrol_targets(self.belief.to_json())
                 if targets:
@@ -142,6 +143,7 @@ class CogMapLoop:
                     extra_obs = pr["observations"]
                     patrol_path = pr["path"]
                     if pr["failures"]:
+                        patrol_preempted, patrol_cells = True, len(pr["failures"])
                         # patrol found a change: repair immediately, before any task fails
                         rep = repair_map(self.belief.to_json(), {"observations": {}, "results": [{"failures": pr["failures"]}]},
                                          use_llm=self.use_llm, extra_obs=extra_obs)
@@ -189,7 +191,8 @@ class CogMapLoop:
             rounds.append({"round": i, "story": story, "perturbation": info, "repairs": n_rep,
                            "steps_to_recover": steps_to_recover, "final_success": m["success_rate"],
                            "map_version": self.belief.version, "rule_ops": rule_ops_n,
-                           "llm_ops_applied": llm_applied, "llm_ops_rejected": llm_rejected})
+                           "llm_ops_applied": llm_applied, "llm_ops_rejected": llm_rejected,
+                           "patrol_preempted": patrol_preempted, "patrol_changed_cells": patrol_cells})
             print(f"  round {i} done: success={m['success_rate']:.2f} steps_to_recover={steps_to_recover} repairs={n_rep}")
         lb = publish_leaderboard(self.eval_refs)
         changelog = reflect(self.belief.changelog, [r["story"] for r in rounds], self.timeline)
