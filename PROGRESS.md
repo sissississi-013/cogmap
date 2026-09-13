@@ -74,3 +74,5 @@
 - 04:08 Map versions published as Weave objects (map-<name>); README renders on GitHub (mermaid, GIF, images verified via API). Verifying with out/synth_check; Go2 walk re-render (lower blocks, calmer camera) for the office reel.
 - 04:10 Go2 walk re-rendered (20 cm blocks, calmer camera) → out/office/reel.mp4 rebuilt. tests/test_explore.py added (12 tests). Portrait clip full loop running (out/portrait).
 - 04:09 synth_check confirms end-to-end after latest changes (100/100/100/94%; patrol pre-empt in round 3); map versions published as Weave objects.
+- 04:14 Portrait 9:16 clip full loop OK (out/portrait): v0 94% → explored 100% → changes 75%/9c, 81%/3c (patrol pre-empted), stale → all recover to ≥94%; 3 rounds.
+- Docker (OrbStack) started to load the exported map in a real ROS 2 Nav2 map_server (anonymous pull; user's stale Docker Hub token bypassed via --config). Running.
