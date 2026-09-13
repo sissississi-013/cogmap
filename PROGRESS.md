@@ -77,3 +77,4 @@
 - 04:14 Portrait 9:16 clip full loop OK (out/portrait): v0 94% → explored 100% → changes 75%/9c, 81%/3c (patrol pre-empted), stale → all recover to ≥94%; 3 rounds.
 - Docker (OrbStack) started to load the exported map in a real ROS 2 Nav2 map_server (anonymous pull; user's stale Docker Hub token bypassed via --config). Running.
 - 04:13 PROOF: exported map loads in real ROS 2 Humble nav2_map_server (Docker via public.ecr.aws mirror): "Read map /maps/map.pgm: 112 X 109 map @ 0.15 m/cell", /map published. scripts/nav2_check.sh + docs/proof/nav2_map_server.log; README + SUBMISSION updated.
+- 04:16 Experiment running: Nav2 planner_server (NavFn) + static costmap on the exported map, asking /compute_path_to_pose from task t0's start to the bookshelf_2 waypoint (out/nav2_check/plan_log.txt).
