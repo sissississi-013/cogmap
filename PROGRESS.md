@@ -85,3 +85,4 @@
 ## 04:20 PDT — ⚠️ OPENAI CREDITS EXHAUSTED (iteration 12)
 - `Error code: 429 - You have no credits remaining` from OpenAI during out/final_check. Pipeline degraded gracefully (blob landmarks, LLM repair skipped, reflector skipped). Storyboard checklist step 0 tells Sissi to add credits or use a valid Anthropic key. Installing torch+transformers for an OWLv2 local detector fallback (no API needed).
 - 04:23 OWLv2 local detector validated end-to-end on the office scan (12 objects, 58 s, no API). detect_all auto-falls back when the API detector fails; COGMAP_DETECTOR=owlv2 forces it. torch/transformers added to requirements.
+- 04:26 Found evaluate_map spending minutes in a blocking Weave flush (trace-URL lookup); removed → 6.9 s per real-map evaluation with URL still resolved. Final morning-path check relaunched (out/final_check) with fast code + OWLv2 fallback (OpenAI credits exhausted).
