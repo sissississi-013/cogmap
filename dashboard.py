@@ -29,7 +29,7 @@ def _(json, mo, os, run_sel):
     res = json.load(open(os.path.join(run, "loop_result.json"))) if run else {"timeline": [], "rounds": []}
     tl = res["timeline"]
     rows = [{"map version": f"v{m['version']}", "label": m["label"], "success": f"{m['success_rate']:.0%}",
-             "SPL": f"{m['spl']:.2f}", "collisions": int(m["collisions"]), "story": m.get("story", ""),
+             "SPL": f"{m['spl']:.2f}", "collisions": int(m["collisions"]), "known cells": m.get("known_cells", ""), "story": m.get("story", ""),
              "weave trace": m.get("weave_call_url", "")} for m in tl]
     rounds = [{"round": r["round"], "story": r["story"], "patrol caught it first": "yes" if r.get("patrol_preempted") else "no",
                "repairs": r["repairs"], "rule ops": r.get("rule_ops", ""), "LLM ops applied / rejected": f"{r.get('llm_ops_applied', '')} / {r.get('llm_ops_rejected', '')}",
