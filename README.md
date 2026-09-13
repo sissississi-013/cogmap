@@ -155,7 +155,7 @@ is removed before any task runs (0 repairs, 574 steps vs 519 steps for a full ta
 | success recovering per map version | `out/<run>/curve.png` + Weave Evaluations compare view / leaderboard |
 | steps-to-recover per change | `out/<run>/steps_to_recover.png` |
 | human-readable changelog | `out/<run>/map_changelog.md` |
-| robot artifact | `out/<run>/scan/nav2/map.pgm`, `map.yaml`, `waypoints.json` — loads in ROS 2 Nav2 (`scripts/nav2_check.sh`, `docs/proof/`) |
+| robot artifact | `out/<run>/scan/nav2/map.pgm`, `map.yaml`, `waypoints.json` — loads in ROS 2 Nav2 and NavFn plans on it (`scripts/nav2_check.sh`, `scripts/nav2_plan.sh`, `docs/proof/`) |
 | dashboard | `marimo run dashboard.py` |
 | 40-second B-roll reel (overview → swarm → curves → Go2) | `scripts/make_reel.sh out/<run>` → `out/<run>/reel.mp4` |
 
@@ -224,7 +224,9 @@ run_demo.py     CLI · dashboard.py  marimo · tests/  pytest
 - Unknown cells (never seen by the phone) are treated as blocked in the true world and as high-cost in the belief.
 - We claim Nav2-compatibility of the exported artifact, not that Unitree's proprietary app ingests it. **Verified:** the
   exported `map.pgm`/`map.yaml` load in a stock ROS 2 Humble `nav2_map_server` and are published on `/map`
-  (`scripts/nav2_check.sh out/<run>/scan/nav2`, log in `docs/proof/nav2_map_server.log`).
+  (`scripts/nav2_check.sh`, `docs/proof/nav2_map_server.log`), and Nav2's own **NavFn planner** (`planner_server` +
+  static global costmap) plans a 178-pose path on it from a task start to the `bookshelf_2` waypoint
+  (`scripts/nav2_plan.sh out/office`, `docs/proof/nav2_planner.log`: `Goal finished with status: SUCCEEDED`).
 
   <p align="center"><img src="docs/img/nav2_map.png" width="55%"><br><sub>The exported map.pgm with the named waypoints, exactly as map_server publishes it.</sub></p>
 

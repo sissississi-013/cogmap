@@ -1,0 +1,31 @@
+== compute_path_to_pose from (-1.796, 3.684) to (1.654, 5.934) [bookshelf_2]
+Goal accepted with ID: 35728c8caabd4ba2b7e46dcb7056d326
+  poses:
+planning_time:
+Goal finished with status: SUCCEEDED
+== path length (poses):
+178
+== costmap info
+  resolution: 0.15000000596046448
+  width: 112
+  height: 109
+      x: -9.221
+      y: -6.891
+      x: 0.0
+== map_server log
+[INFO] [1789298102.103998717] [map_io]: Read map /maps/map.pgm: 112 X 109 map @ 0.15 m/cell
+[INFO] [1789298103.016144239] [map_server]: Activating
+[INFO] [1789298103.016267241] [map_server]: Creating bond (map_server) to lifecycle manager.
+== planner log
+[INFO] [1789298103.808403886] [global_costmap.global_costmap]: Using plugin "inflation_layer"
+[INFO] [1789298103.808503179] [global_costmap.global_costmap]: Initialized plugin "inflation_layer"
+[INFO] [1789298103.812895103] [planner_server]: Created global planner plugin GridBased of type nav2_navfn_planner/NavfnPlanner
+[INFO] [1789298103.812919978] [planner_server]: Configuring plugin GridBased of type NavfnPlanner
+[INFO] [1789298103.813009646] [planner_server]: Planner Server has GridBased  planners available.
+[INFO] [1789298103.820145975] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 112 X 109 at 0.150000 m/pix
+[INFO] [1789298104.937033442] [planner_server]: Activating
+[INFO] [1789298104.937343278] [global_costmap.global_costmap]: Activating
+[INFO] [1789298104.937382945] [global_costmap.global_costmap]: Checking transform
+[INFO] [1789298104.937631906] [global_costmap.global_costmap]: start
+[INFO] [1789298104.992752145] [planner_server]: Activating plugin GridBased of type NavfnPlanner
+[INFO] [1789298104.994634666] [planner_server]: Creating bond (planner_server) to lifecycle manager.

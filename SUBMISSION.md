@@ -12,8 +12,8 @@ CogMap turns a phone walkthrough of any space into a cognitive map (metric occup
 swarm of simulated robots learns to navigate. When the world changes, the swarm's navigation failures drive an automatic
 map repair (deterministic ops + LLM scene-graph edits validated against observations), so success recovers; across
 changes the swarm learns where the world is volatile and heals faster. Every map version is a W&B Weave evaluation, and the
-map is exported as the ROS 2 Nav2 artifact real robots (Unitree Go2/G1 stacks) load — verified in a stock ROS 2 Humble
-`nav2_map_server` (`docs/proof/nav2_map_server.log`).
+map is exported as the ROS 2 Nav2 artifact real robots (Unitree Go2/G1 stacks) load — verified: a stock ROS 2 Humble
+`nav2_map_server` publishes it and Nav2's NavFn planner plans a path on it (`docs/proof/`).
 
 ## What makes the loop self-improving
 - **Inner loop (self-correcting map):** plan on belief → execute in truth → failure events → repair → new map version →
