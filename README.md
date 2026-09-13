@@ -38,6 +38,10 @@ flowchart LR
   subgraph outer["outer loop: self-improving swarm"]
     Mk --> Vol[volatility prior] --> P[patrols verify volatile cells<br/>before tasks run] --> R
   end
+  subgraph explore["exploration: the map grows"]
+    Mk --> Fr[frontier scouts push into unknown space] --> R
+  end
+  B[second walkthrough<br/>after furniture moved] -->|register + diff| W
   Mk --> X[export map.pgm + map.yaml + waypoints.json<br/>ROS 2 Nav2]
   W[world changes] --> S
 ```
@@ -204,7 +208,7 @@ cogmap/
   agents.py     A*, NavAgent (mission budget 1.5x optimal, 3x3 sensor, FailureEvents), Swarm, patrol sweeps
   repair.py     rule_repair, llm_propose_ops (Claude/OpenAI) + validate_and_apply_ops, patrol_targets, search_targets, reflect
   evals.py      MapNavModel(weave.Model), scorers success/spl/collisions/failures, evaluate_map, publish_leaderboard
-  loop.py       CogMapLoop: patrol -> eval -> swarm -> search -> repair -> re-eval, per world change
+  loop.py       CogMapLoop: explore -> patrol -> eval -> swarm -> search -> repair -> re-eval, per world change
   viz.py        curve, snapshots, swarm.mp4, scan_overview, pointcloud.html
   scan/
     frames.py       ffmpeg keyframes
@@ -212,7 +216,8 @@ cogmap/
     grid.py         floor-plane fit, scale normalisation, occupancy grid, cropping
     objects.py      VLM detection per keyframe (gpt-5 / Claude, or local OWLv2 fallback) -> point-map anchoring -> merge -> footprints
     export_nav2.py  map.pgm + map.yaml + waypoints.json
-    pipeline.py     scan_to_world(), auto_perturbations() for arbitrary scanned spaces
+    pipeline.py     scan_to_world(), auto_perturbations() for arbitrary scanned spaces, rescan_perturbation()
+    rescan.py       register a second walkthrough to the first map (FFT cross-correlation over rotation/scale), diff
 run_demo.py     CLI · dashboard.py  marimo · tests/  pytest
 ```
 
@@ -239,7 +244,8 @@ run_demo.py     CLI · dashboard.py  marimo · tests/  pytest
   matters on real robots.
 - Simulated agents see a deterministic 3×3 sensor; real perception is noisier. The consensus threshold `k` in
   `rule_repair` is the knob for that.
-- Unknown cells (never seen by the phone) are treated as blocked in the true world and as high-cost in the belief.
+- Unknown cells (never seen by the phone) are high-cost in the belief; in the simulated ground truth, unknown cells
+  within 3 cells of seen floor count as floor (rooms are bigger than the scan) and anything further is treated as blocked.
 - We claim Nav2-compatibility of the exported artifact, not that Unitree's proprietary app ingests it. **Verified:** the
   exported `map.pgm`/`map.yaml` load in a stock ROS 2 Humble `nav2_map_server` and are published on `/map`
   (`scripts/nav2_check.sh`, `docs/proof/nav2_map_server.log`), and Nav2's own **NavFn planner** (`planner_server` +
