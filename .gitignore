@@ -1,0 +1,15 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+footage/
+work/
+renders/
+wandb/
+.claude/ralph-loop.local.md
+*.mp4
+*.mov
+*.MOV
+*.mp3
+*.wav
+!demo/assets/*.mp4
