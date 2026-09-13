@@ -142,6 +142,19 @@ Same recovery power in both (the deterministic repair is the workhorse), but wit
 caught **before the task swarm runs** (100% instead of 88%, 7 instead of 18 collisions), and the map ends with 22% more
 known cells than the scan started with (2125 → 2595) because scouts kept pushing the frontier between changes.
 
+
+### Stability across task sets (synthetic apartment, 5 seeds, rule repair + patrols + exploration)
+
+| round | success right after the change (mean ± sd, n=5) | success after repair | repairs |
+|---|---|---|---|
+| 1 | 88% ± 9% | 99% ± 2% | 1.0 |
+| 2 | 92% ± 9% | 98% ± 3% | 0.6 |
+| 3 | 99% ± 2% | 99% ± 2% | 0.4 |
+| 4 | 81% ± 14% | 98% ± 3% | 1.0 |
+
+Same world, five different random task sets: the drop after each change varies with which tasks cross the changed area,
+the recovery does not (`scripts/seed_sweep.sh 5`).
+
 ### Ablation (synthetic apartment): what each part of the loop buys
 
 Cells are `final success / repairs needed / agent steps to recover`.
