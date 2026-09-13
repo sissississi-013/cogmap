@@ -53,16 +53,29 @@ def rule_repair(belief_json: dict, results_json: List[dict], observations: Dict[
     if changed:
         ops.append({"op": "flip_cells", "n": len(changed)})
 
-    # 2. orphaned objects: footprint observed free -> object is missing from here
+    # 2. orphaned objects: footprint observed free (ignoring cells shared with other objects), or agents that reached
+    #    the goal cells and reported the object missing (goal_missing) at least twice
+    missing_counts: Dict[str, int] = {}
+    for r in results_json:
+        for f in r.get("failures", []):
+            if f.get("kind") == "goal_missing":
+                missing_counts[f["goal"]] = missing_counts.get(f["goal"], 0) + 1
+    shared = {}
+    for name, o in belief.objects.items():
+        for c in o.cells:
+            shared.setdefault(c, set()).add(name)
     for name, o in list(belief.objects.items()):
-        foot = [c for c in o.cells if belief.in_bounds(c)]
+        foot = [c for c in o.cells if belief.in_bounds(c) and shared.get(c, set()) == {name}]
         seen_free = sum(1 for c in foot if obs.get(c) and _consensus(obs[c])[0] == FREE)
         seen_occ = sum(1 for c in foot if obs.get(c) and _consensus(obs[c])[0] == OCCUPIED)
-        # an agent standing next to the footprint and seeing free cells where the object should be is strong evidence
-        if foot and ((seen_free >= 1 and seen_occ == 0) or seen_free >= max(1, len(foot) // 2)):
-            ops.append({"op": "remove_object", "name": name, "reason": f"{seen_free}/{len(foot)} footprint cells observed free"})
-            for c in foot:
-                if belief.grid[c] == OCCUPIED and not (obs.get(c) and _consensus(obs[c])[0] == OCCUPIED):
+        by_obs = foot and ((seen_free >= 1 and seen_occ == 0) or seen_free >= max(1, len(foot) // 2))
+        by_missing = missing_counts.get(name, 0) >= 2 and seen_occ <= len(foot) // 4
+        if by_obs or by_missing:
+            why = f"{seen_free}/{len(foot)} footprint cells observed free" if by_obs else f"reported missing by {missing_counts[name]} agents"
+            ops.append({"op": "remove_object", "name": name, "reason": why})
+            for c in o.cells:
+                if belief.in_bounds(c) and belief.grid[c] == OCCUPIED and shared.get(c, set()) == {name} \
+                        and not (obs.get(c) and _consensus(obs[c])[0] == OCCUPIED):
                     belief.set_cell(c, FREE, 0.7)
                     changed.append(c)
             del belief.objects[name]
@@ -93,7 +106,7 @@ def rule_repair(belief_json: dict, results_json: List[dict], observations: Dict[
     new_blobs = [o["name"] for o in ops if o["op"] == "add_object"]
     for nn in sorted(new_blobs, key=lambda n: -len(belief.objects[n].cells)):
         n_new = len(belief.objects[nn].cells)
-        cands = [r for r in removed if n_new <= removed_sizes[r] * 1.5 and not r.startswith("unknown_obstacle")]
+        cands = [r for r in removed if n_new <= removed_sizes[r] * 2.0 and not r.startswith("unknown_obstacle")]
         if not cands:
             continue
         wanted = [r for r in cands if r in missing_goals]
