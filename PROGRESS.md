@@ -59,3 +59,7 @@
 
 ## 04:05 PDT — exploration loop (iteration 6)
 - Added frontier exploration (scout_frontier_targets → patrol → rule_repair) before each round + `known_cells` coverage metric per map version (green line on curve). Office map: +140 known cells in 353 steps on the first sweep. Full office run with exploration: out/office (running). synth_final validated (named ops, Weave Dataset, LLM post-mortem in map_changelog.md).
+
+## 04:03 PDT (iteration 8)
+- Go2 now walks an A* path from the CogMap belief on the scanned map (Genesis, kinematic base + trot): out/venue_test/go2_walk.mp4 (9.6 s); wired into run_venue.sh + dashboard.
+- Office ablation (rule-only, no patrols/explore/LLM) done: out/office_ablation. Full office run with exploration: out/office (finishing). scripts/ablation_table.py prints the README table.
