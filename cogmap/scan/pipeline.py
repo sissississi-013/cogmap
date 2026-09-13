@@ -167,17 +167,26 @@ def _block_cell(world: TrueWorld, obj_name: str, cell: Cell) -> dict:
 
 
 def auto_perturbations(world: TrueWorld, tasks: List[dict]) -> List[dict]:
-    """Generic 3-round script for a scanned map: block a chokepoint, move a goal object, un-block (stale map)."""
+    """Generic 3-round script for a scanned map: the largest object blocks the busiest chokepoint, the most-visited
+    goal object moves across the room, then the blocker is removed again (stale map)."""
     if not world.objects:
         return []
-    by_size = sorted(world.objects.values(), key=lambda o: len(o.cells))
-    small, big = by_size[0], by_size[-1]
+    by_size = sorted(world.objects.values(), key=lambda o: -len(o.cells))
+    blocker = by_size[0]
+    goal_counts: Dict[str, int] = {}
+    for t in tasks:
+        goal_counts[t["goal"]] = goal_counts.get(t["goal"], 0) + 1
+    mover_name = max((n for n in goal_counts if n != blocker.name), key=lambda n: goal_counts[n], default=None)
+    if mover_name is None:
+        mover_name = by_size[1].name if len(by_size) > 1 else blocker.name
+    mover = world.objects[mover_name]
     chk = _chokepoint(world, tasks)
-    far = _far_free_cell(world, big.anchor, len(big.cells))
+    far = _far_free_cell(world, mover.anchor, len(mover.cells))
+    home = blocker.anchor
     return [
-        {"fn": _block_cell, "args": [small.name, chk], "story": f"The {small.name} was left in the busiest corridor (chokepoint at {chk})."},
-        {"fn": relocate_object, "args": [big.name, far], "story": f"The {big.name} was moved to the other side of the space ({far})."},
-        {"fn": relocate_object, "args": [small.name, small.anchor], "story": f"The {small.name} was put back: the corridor is open again but the map still thinks it is blocked."},
+        {"fn": _block_cell, "args": [blocker.name, chk], "story": f"The {blocker.name} was dragged into the busiest corridor (chokepoint at {chk})."},
+        {"fn": relocate_object, "args": [mover.name, far], "story": f"The {mover.name} (goal of {goal_counts.get(mover.name, 0)} tasks) was moved across the room to {far}."},
+        {"fn": relocate_object, "args": [blocker.name, home], "story": f"The {blocker.name} was put back: the corridor is open again but the map still thinks it is blocked."},
     ]
 
 

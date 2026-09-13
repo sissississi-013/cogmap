@@ -58,13 +58,16 @@ def astar(passable, start: Cell, goals: Set[Cell], shape, unknown_cost=None, max
 def goal_cells_for(belief: BeliefMap, goal: str) -> Set[Cell]:
     """Free cells adjacent to the believed footprint of `goal`."""
     cells = belief.object_cells(goal)
-    adj = set()
+    adj_free, adj_unknown = set(), set()
     for r, c in cells:
         for dr, dc in NEIGH4:
             nb = (r + dr, c + dc)
-            if belief.in_bounds(nb) and nb not in cells and belief.grid[nb] != OCCUPIED:
-                adj.add(nb)
-    return adj
+            if belief.in_bounds(nb) and nb not in cells:
+                if belief.grid[nb] == FREE:
+                    adj_free.add(nb)
+                elif belief.grid[nb] == UNKNOWN:
+                    adj_unknown.add(nb)
+    return adj_free if adj_free else adj_unknown   # only aim at unknown cells if nothing known-free touches the object
 
 
 @dataclass
@@ -126,6 +129,14 @@ class NavAgent:
     def _unknown_cost(self, cell: Cell) -> float:
         return 2.0 if self.belief.grid[cell] == UNKNOWN else 0.0
 
+    def _plan(self, pos: Cell, goals: Set[Cell]):
+        """Plan through known-free cells first; only if that fails, allow unknown cells (with a cost)."""
+        known_free = lambda c: self.belief.in_bounds(c) and self.belief.grid[c] == FREE
+        path = astar(known_free, pos, goals, self.belief.shape)
+        if path is None:
+            path = astar(self.belief.passable, pos, goals, self.belief.shape, self._unknown_cost)
+        return path
+
     def run(self, task: dict) -> EpisodeResult:
         start = tuple(task["start"])
         goal = task["goal"]
@@ -144,7 +155,7 @@ class NavAgent:
         pos = start
         res.path = [pos]
         self._observe(pos, res)
-        path = astar(self.belief.passable, pos, goals, self.belief.shape, self._unknown_cost)
+        path = self._plan(pos, goals)
         if path is None:
             res.failures.append(FailureEvent("no_path", pos, FREE, OCCUPIED, self.id, 0, goal))
             return res
@@ -171,7 +182,7 @@ class NavAgent:
                 if res.replans > self.max_replans:
                     break
                 goals = goal_cells_for(self.belief, goal)
-                path = astar(self.belief.passable, pos, goals, self.belief.shape, self._unknown_cost)
+                path = self._plan(pos, goals)
                 if path is None:
                     res.failures.append(FailureEvent("no_path", pos, FREE, OCCUPIED, self.id, res.steps, goal))
                     return res
@@ -225,7 +236,7 @@ class Swarm:
                 (t[0] + dr, t[1] + dc) for dr, dc in NEIGH4 if agent.belief.passable((t[0] + dr, t[1] + dc))}
             if not goals:
                 continue
-            path = astar(agent.belief.passable, pos, goals, agent.belief.shape, agent._unknown_cost)
+            path = agent._plan(pos, goals)
             if path is None:
                 continue
             for nxt in path[1:]:

@@ -20,8 +20,16 @@ You are building **CogMap** autonomously overnight in /Users/sissi/weavehacks. R
 5. **Viz + dashboard (by 08:00):** `out/swarm.mp4` animation (belief | true grid, agents, failure X's, version banner), `out/pointcloud.html`, curve plots, marimo `dashboard.py` showing videos/curves/changelog/Weave links; include Genesis Go2 clip if the spike produced one.
 6. **Ship (by 08:30):** README.md (what/why, architecture diagram in mermaid, the two loops, how to run, every sponsor tool and how it's used, Weave project link, honest limitations), `SUBMISSION.md` (2–3 sentence description, track: Best Use of Weave, sponsor list, 3-minute demo script, social post draft), final push. Then run one full clean `run_demo.py` from scratch to prove it, paste evidence in PROGRESS.md.
 
-When ALL six phases are done, verified end-to-end (fresh `run_demo.py` run succeeded, tests green, pushed to GitHub, Weave leaderboard URL recorded in PROGRESS.md), output exactly: <promise>COGMAP COMPLETE</promise>
-If time passes 08:45 and phases remain, finish the highest-value remaining item, document precisely what is missing in PROGRESS.md and README, push, and output the promise anyway.
+7. **Improve until 10:00 PDT (Sissi's instruction: "work till 10 AM arrives or usage is depleted").** After phases 1–6 are verified, do NOT stop. Each iteration: pick the highest-value item from the backlog below (or a better one you discover), implement, verify (run it, look at the output), commit, push, update PROGRESS.md. Backlog, in priority order:
+   a. Demo legibility: the real-map curve must show a clear drop and recovery (tight budgets, perturbations that bite, clean v0 baseline). One-command `python run_demo.py --video X` must finish in <6 min and leave everything the demo needs in out/<run>/.
+   b. Weave polish: Evaluation display names, a published Leaderboard that actually renders in the UI (check via the W&B MCP server or API), per-round Weave "compare" links recorded in loop_result.json, video/image logging of swarm.mp4 and scan_overview.png as Weave objects.
+   c. The LLM repair agent's value: log applied vs rejected ops; add an ablation run (`--no-llm`) and a table in README comparing rule-only vs rule+LLM (steps-to-recover, repairs, final success) on synthetic + real maps.
+   d. Outer-loop evidence: steps-to-recover trending down across rounds in at least one run; if not, tune the volatility prior / patrol budget and show it honestly.
+   e. Robustness for the venue scan tomorrow: handle portrait video, longer videos (subsample to 64 frames), VGGT failure fallback (VLM-estimated coarse grid), objects fewer than 4, no reachable tasks. Test with footage/tum/tum_room.mp4 and footage/fallback/luxury_room_18s.mp4.
+   f. Dashboard/README/SUBMISSION polish; Go2 B-roll (out/lux/go2_on_map.mp4) embedded; a 2-minute demo storyboard with exact file paths; docs/img refreshed from the best run.
+   g. Tests for repair ops, exporter, and scan grid on a synthetic npz.
+   Only when the clock reads 10:00 PDT or later (check with `date`), and everything is committed and pushed, output exactly: <promise>COGMAP COMPLETE</promise>
+If before 10:00 the API/usage is clearly exhausted (repeated auth/rate errors that don't recover), commit + push what exists, document it in PROGRESS.md, and output the promise.
 
 Commit attribution (append to every commit message):
 Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>

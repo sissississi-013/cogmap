@@ -1,0 +1,47 @@
+# CogMap — submission notes (AGI House platform)
+
+**Team name:** CogMap
+**Members:** Sissi Wang (solo) — built with Claude Code running a Ralph loop overnight
+**Track:** Best Use of Weave (also eligible: Best Loop Design, Best Use of marimo)
+**Repo:** https://github.com/sissississi-013/cogmap
+**Weave project:** https://wandb.ai/sissiwang-maglev/cogmap/weave
+**Modal app:** cogmap-vggt (VGGT-1B on A10G)
+
+## 2–3 sentence description
+CogMap turns a phone walkthrough of any space into a cognitive map (metric occupancy grid + semantic object graph) that a
+swarm of simulated robots learns to navigate. When the world changes, the swarm's navigation failures drive an automatic
+map repair (deterministic ops + LLM scene-graph edits validated against observations), so success recovers; across
+changes the swarm learns where the world is volatile and heals faster. Every map version is a W&B Weave evaluation, and the
+map is exported as the ROS 2 Nav2 artifact real robots (Unitree Go2/G1 stacks) load.
+
+## What makes the loop self-improving
+- **Inner loop (self-correcting map):** plan on belief → execute in truth → failure events → repair → new map version →
+  re-evaluate on a fixed task set. Success: 100% → (couch moved) 75% → 100%; (doorway blocked) 62% → 94%.
+- **Outer loop (self-improving swarm):** repairs feed a per-cell volatility prior; patrols verify volatile cells before
+  tasks run, so a later stale-map change is caught pre-emptively (round 3: 0 task failures); a search sweep finds objects
+  that went missing and re-identifies them by footprint.
+- **Observable:** every step is a `@weave.op`; each map version is a `weave.Evaluation` (`map_v{k}`); a Weave Leaderboard ranks versions.
+
+## Sponsor tools & how they're used
+- **W&B Weave:** tracing of every agent step (swarm runs, patrols, rule/LLM repair, validation, scan stages), per-map-version
+  Evaluations with custom scorers (success, SPL, collisions, failures), Leaderboard, published map objects; W&B MCP server
+  registered in the coding agent.
+- **Modal:** GPU 3D reconstruction (VGGT-1B) as a deployed app with warm containers (~6 s GPU time per scan).
+- **marimo:** `dashboard.py` results dashboard (curves, tables, scan overview, swarm video, changelog, Nav2 export).
+- **OpenAI gpt-5 (and Claude when a key is available):** repair agent (structured scene-graph ops) and VLM object detector.
+- Protocols/frameworks: no A2A/MCP at runtime; MCP used at build time (W&B MCP server in Claude Code).
+
+## 3-minute demo script
+0:00 Phone walkthrough clip (15 s) → "this is all the robot gets".
+0:20 `scan_overview.png` + 3D point cloud: grid, labeled furniture, phone path; `map.yaml` export on screen.
+0:50 `swarm.mp4`: agents navigate the scanned room (map v0, Weave eval 100%).
+1:10 "Someone moved the couch": agents fail (red X), success drops; failure log in Weave trace.
+1:35 Repair trace: rule ops + LLM ops (applied/rejected) → map v1; success climbs; leaderboard.
+2:10 Round 3: volatility prior → patrol catches the stale obstacle before any task fails; steps-to-recover chart.
+2:35 Same loop on the synthetic apartment (4 changes) + Nav2 artifact → "the map outlives the robot generation".
+2:50 One slide: two loops, Weave, Modal, marimo.
+
+## Social post draft
+Built CogMap at @weights_biases CoreWeave Hacks: walk through a room with your phone → a swarm of sim robots learns the map →
+move the couch → their failures repair the map → success recovers, tracked as Weave evaluations. Exports the Nav2 map a
+Unitree Go2 loads. Repo: github.com/sissississi-013/cogmap #WeaveHacks #CoreWeaveHacks

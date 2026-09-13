@@ -95,6 +95,17 @@ class CogMapLoop:
         print(f"[eval] {label}: success={m['success_rate']:.2f} spl={m['spl']:.2f} collisions={m['collisions']:.0f}")
         return m
 
+    def _recovered(self, m: dict) -> bool:
+        b = getattr(self, "baseline", None) or {"success_rate": 1.0, "collisions": 0, "spl": 1.0}
+        return (m["success_rate"] >= min(self.recover_threshold, b["success_rate"] - 0.05)
+                and m["collisions"] <= max(0, 0.25 * b["collisions"])
+                and m["spl"] >= 0.9 * b["spl"])
+
+    @staticmethod
+    def _better(m: dict, prev: dict) -> bool:
+        return (m["success_rate"] > prev["success_rate"] + 1e-9 or m["collisions"] < prev["collisions"] - 1e-9
+                or m["spl"] > prev["spl"] + 1e-9)
+
     def _snapshot(self, label: str, swarm_out: Optional[dict] = None, patrol_path=None):
         self.frames.append({"label": label, "version": self.belief.version,
                             "belief": self.belief.grid.tolist(), "true": self.world.grid.tolist(),
@@ -107,7 +118,8 @@ class CogMapLoop:
     @weave.op
     def run(self, perturbations: List[dict]) -> dict:
         t0 = time.time()
-        self._eval("v0-initial", "Initial cognitive map from the scan.")
+        base = self._eval("v0-initial", "Initial cognitive map from the scan.")
+        self.baseline = base
         self._snapshot("v0 initial map")
         rounds = []
         for i, p in enumerate(perturbations, start=1):
@@ -137,7 +149,9 @@ class CogMapLoop:
             steps_to_recover += swarm_out["summary"]["steps"]
             self._snapshot(f"round {i}: world changed (map v{self.belief.version})", swarm_out, patrol_path)
             n_rep = 0
-            while (m["success_rate"] < self.recover_threshold or m["collisions"] > 0 or m["spl"] < 0.9) and n_rep < self.max_repairs_per_round:
+            prev = None
+            while not self._recovered(m) and n_rep < self.max_repairs_per_round and (prev is None or self._better(m, prev)):
+                prev = m
                 # active search: if a goal object went missing, sweep unobserved cells to find where it went
                 missing = {f["goal"] for r in swarm_out["results"] for f in r["failures"] if f["kind"] == "goal_missing"}
                 if missing:
