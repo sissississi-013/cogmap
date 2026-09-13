@@ -42,3 +42,7 @@
 ## 03:50 PDT (iteration 3, cont.)
 - Outer-loop evidence chart (failures at change: TUM 25 → 2 → 1) added to viz/README/SUBMISSION. Chrome extension not connected → Weave UI screenshots are on Sissi's morning checklist (docs/demo-storyboard.md).
 - Final from-scratch run in progress: out/final_lux (one command, fresh dir).
+
+## 03:55 PDT (iteration 3, cont.)
+- From-scratch run out/final_lux exposed a v0-collisions regression caused by the floor-margin change (tasks were reachability-checked on the truth, which now has more floor than the belief knows). Fixed: reachable_tasks uses the belief's known-free cells. Grid builder: inclusive floor-candidate selection (flat-floor edge case). New unit test tests/test_scan_grid.py (synthetic point cloud). 11 tests green.
+- run_venue.sh (one-shot morning script) under test on TUM → out/venue_test.
