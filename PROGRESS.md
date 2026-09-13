@@ -63,3 +63,6 @@
 ## 04:03 PDT (iteration 8)
 - Go2 now walks an A* path from the CogMap belief on the scanned map (Genesis, kinematic base + trot): out/venue_test/go2_walk.mp4 (9.6 s); wired into run_venue.sh + dashboard.
 - Office ablation (rule-only, no patrols/explore/LLM) done: out/office_ablation. Full office run with exploration: out/office (finishing). scripts/ablation_table.py prints the README table.
+
+## 04:05 PDT (iteration 9)
+- Office run with exploration finished: v0 100% → explored (+140 cells, SPL .89→.95) → change1 88%/24c → 100% → change2 75%/9c → 100% → change3 caught by patrol (100%/7c) → 100%; known cells 2125 → 2595. Real-map ablation table (full vs rule-only) added to README; docs/img refreshed from out/office.

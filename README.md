@@ -114,6 +114,20 @@ to the cells that changed before, they saw the difference, and the map was repai
 
 <p align="center"><img src="docs/img/tum_curve.png" width="58%"> <img src="docs/img/tum_steps.png" width="40%"></p>
 
+
+### Ablation on the real office scan: what the outer loops buy
+
+Cells read `success / collisions right after the change → success after repair`. Same scan, same 12 tasks, same three changes.
+
+| variant | round 1 | round 2 | round 3 | final map | known cells v0 → end |
+|---|---|---|---|---|---|
+| full loop (patrols + exploration + LLM repair) | 88%/24c → 100% in 1 repair | 75%/9c → 100% in 1 repair | 100%/7c (patrol caught it) → 100% in 1 repair | v8 | 2125 → 2595 |
+| rule repair only (no patrols, no exploration, no LLM) | 81%/35c → 100% in 1 repair | 75%/6c → 100% in 1 repair | 88%/18c → 100% in 1 repair | v3 | 2125 → 2384 |
+
+Same recovery power in both (the deterministic repair is the workhorse), but with patrols + exploration the third change is
+caught **before the task swarm runs** (100% instead of 88%, 7 instead of 18 collisions), and the map ends with 22% more
+known cells than the scan started with (2125 → 2595) because scouts kept pushing the frontier between changes.
+
 ### Ablation (synthetic apartment): what each part of the loop buys
 
 Cells are `final success / repairs needed / agent steps to recover`.
