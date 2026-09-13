@@ -71,18 +71,14 @@ def evaluate_map(belief: BeliefMap, world: TrueWorld, tasks: List[dict], label: 
     try:  # clickable URL of this evaluation's trace (flush the batch first; retry briefly)
         import time as _t
         client = weave.get_client()
-        try:
-            client.flush()
-        except Exception:  # noqa: BLE001
-            pass
-        for _ in range(4):
+        for _ in range(2):
             calls = list(client.get_calls(filter={"op_names": [f"weave:///{client.entity}/{client.project}/op/Evaluation.evaluate:*"]},
                                           limit=5, sort_by=[{"field": "started_at", "direction": "desc"}]))
             hit = next((k for k in calls if k.display_name == label), None)
             if hit is not None:
                 out["weave_call_url"] = f"https://wandb.ai/{client.entity}/{client.project}/weave/calls/{hit.id}"
                 break
-            _t.sleep(1.5)
+            _t.sleep(1.0)
     except Exception:  # noqa: BLE001
         pass
     return out
