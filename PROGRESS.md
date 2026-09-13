@@ -90,3 +90,4 @@
 ## 04:30 PDT — FINAL MORNING-PATH CHECK PASSED (iteration 14)
 - `./run_venue.sh footage/fallback/luxury_room_18s.mp4 out/final_check` from scratch, no API credits: 04:25:32 → 04:29:20. Scan (VGGT 52 s + OWLv2 90 s, 12 labelled objects) → loop v0 100% → explored → couch blocks corridor (8 collisions) → v2 100%/0 → coffee_table moved: patrol pre-empted → v5 100%/0 → stale obstacle 92% → v7; leaderboard + Weave images → Go2 walk clip → 37 s reel → Nav2 NavFn plan SUCCEEDED (26 poses) → nav2_proof/nav2_path.png.
 - Everything Sissi needs in the morning: record venue → `./run_venue.sh footage/raw/venue.mov out/venue` → files it prints; docs/demo-storyboard.md.
+- 04:33 Venue-length test: 90 s clip, 64 frames → VGGT 12 s GPU / 11.4 GB VRAM, scan total 135 s with OWLv2, 12 objects. run_venue.sh now uses 64 frames for clips > 40 s. Nav2 proof refreshed with the longest task (143 poses).
