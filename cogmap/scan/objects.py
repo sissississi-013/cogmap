@@ -9,6 +9,7 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import weave
+from scipy import ndimage
 
 from ..world import WorldObject, OCCUPIED, FREE
 from .grid import world_to_cell
@@ -71,9 +72,12 @@ def _norm(name: str) -> str:
     return aliases.get(n, n)
 
 
+NOT_NAV_GOALS = {"door", "rug", "lamp", "window", "wall", "floor", "ceiling", "mirror", "picture", "painting", "curtain"}
+
+
 @weave.op
 def anchor_objects(detections: List[dict], npz_path: str, frames: List[str], grid_info: dict, every: int = 2,
-                   merge_dist_m: float = 0.9, min_cells: int = 1) -> dict:
+                   merge_dist_m: float = 1.5, min_cells: int = 1, max_objects: int = 12) -> dict:
     """Project each detection into the floor frame via the VGGT point map; merge across frames; build footprints."""
     d = np.load(npz_path)
     pts = d["world_points_from_depth"]           # (S,H,W,3)
@@ -89,6 +93,8 @@ def anchor_objects(detections: List[dict], npz_path: str, frames: List[str], gri
         if i is None:
             continue
         for o in det["objects"]:
+            if _norm(o["name"]) in NOT_NAV_GOALS:
+                continue
             x0, y0, x1, y1 = [float(v) / 1000.0 for v in o["box"]]
             if (x1 - x0) * (y1 - y0) > 0.6:      # box covering most of the frame = wall/room, skip
                 continue
@@ -128,7 +134,10 @@ def anchor_objects(detections: List[dict], npz_path: str, frames: List[str], gri
     # footprints: cells of body points (clipped to grid), at least the anchor cell; unique names
     objects: Dict[str, WorldObject] = {}
     counts: Dict[str, int] = {}
+    free_adj = ndimage.binary_dilation(grid == FREE, iterations=2)
     for cl in sorted(clusters, key=lambda c: -c["n"]):
+        if len(objects) >= max_objects:
+            break
         xy = np.array(cl["body_xy"])
         cells_rc = ((xy - lo) / cell).astype(int)
         cells_rc = cells_rc[(cells_rc[:, 0] >= 0) & (cells_rc[:, 0] < grid.shape[1]) & (cells_rc[:, 1] >= 0) & (cells_rc[:, 1] < grid.shape[0])]
@@ -143,8 +152,8 @@ def anchor_objects(detections: List[dict], npz_path: str, frames: List[str], gri
         ar = int((cl["xy"][1] - lo[1]) / cell); ac = int((cl["xy"][0] - lo[0]) / cell)
         if 0 <= ar < grid.shape[0] and 0 <= ac < grid.shape[1] and (ar, ac) not in cells:
             cells.append((ar, ac))
-        if len(cells) < min_cells:
-            continue
+        if len(cells) < min_cells or not any(free_adj[c] for c in cells):
+            continue   # an object nobody can walk up to is useless as a navigation goal
         base = cl["name"]; counts[base] = counts.get(base, 0) + 1
         name = base if counts[base] == 1 else f"{base}_{counts[base]}"
         objects[name] = WorldObject(name, cells, kind="furniture", confidence=min(0.95, 0.5 + 0.1 * cl["n"]))

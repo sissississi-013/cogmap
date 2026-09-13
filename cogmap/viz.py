@@ -166,3 +166,27 @@ def pointcloud_html(points_xyz, cam_traj_xy, out_path: str, title: str = "CogMap
                       margin=dict(l=0, r=0, t=40, b=0), template="plotly_dark")
     fig.write_html(out_path, include_plotlyjs="cdn")
     return out_path
+
+
+def scan_overview(scan_dir: str, out_path: Optional[str] = None) -> str:
+    """Grid + object labels + phone path for a scanned space (reads scan/belief_v0.json + grid_meta.json)."""
+    import json as _json
+    from .world import BeliefMap
+    b = BeliefMap.load(os.path.join(scan_dir, "belief_v0.json"))
+    meta = _json.load(open(os.path.join(scan_dir, "grid_meta.json")))
+    fig, ax = plt.subplots(figsize=(9, 9 * b.shape[0] / max(b.shape[1], 1)))
+    ax.imshow(b.grid, cmap=CMAP, norm=NORM, interpolation="nearest")
+    cells = np.array(meta.get("cam_traj_cells", []))
+    if len(cells):
+        ax.plot(cells[:, 1], cells[:, 0], "-", color="#e63946", lw=2, label="phone path")
+        ax.plot(cells[0, 1], cells[0, 0], "o", color="#e63946", ms=8)
+    for name, o in b.objects.items():
+        a = o.anchor
+        ax.text(a[1], a[0], name, fontsize=7, ha="center", va="center", color="#ffd166",
+                bbox=dict(boxstyle="round,pad=0.2", fc="#2b2d42", ec="none", alpha=0.85))
+    ax.set_title(f"CogMap v0 from phone scan: {b.shape[1]}x{b.shape[0]} cells @ {meta.get('cell', 0.15)} m — "
+                 f"white=free, black=occupied, grey=unknown", fontsize=9)
+    ax.set_xticks([]); ax.set_yticks([]); ax.legend(loc="lower right", fontsize=8)
+    out_path = out_path or os.path.join(scan_dir, "scan_overview.png")
+    fig.tight_layout(); fig.savefig(out_path, dpi=130); plt.close(fig)
+    return out_path

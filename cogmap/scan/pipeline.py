@@ -203,8 +203,12 @@ def scan_to_world(video: str, out_dir: str, n_frames: int = 48, cell: float = 0.
     # semantic objects
     objects: Dict[str, WorldObject] = {}
     try:
-        dets = detect_all(frames, every=detect_every)
-        json.dump(dets, open(os.path.join(sd, "detections.json"), "w"))
+        det_path = os.path.join(sd, "detections.json")
+        if os.path.exists(det_path) and not os.environ.get("COGMAP_FORCE_DETECT"):
+            dets = json.load(open(det_path))
+        else:
+            dets = detect_all(frames, every=detect_every)
+            json.dump(dets, open(det_path, "w"))
         anc = anchor_objects(dets, npz, frames, {**g, "grid": grid}, every=detect_every)
         objects = {k: WorldObject.from_json(v) for k, v in anc["objects"].items()}
         print(f"[scan] objects: {len(objects)} from {anc['n_candidates']} detections ({time.time()-t0:.1f}s): {list(objects)[:10]}")

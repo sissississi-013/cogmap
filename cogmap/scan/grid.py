@@ -32,7 +32,8 @@ def _ransac_plane(X, n_iter=300, tol=None, rng=np.random.default_rng(0)):
     return vt[2], ctr, int(inl.sum())
 
 
-def build_grid(npz_path: str, cell: float = 0.15, camera_height_m: float = 1.4, max_points: int = 400_000) -> Dict:
+def build_grid(npz_path: str, cell: float = 0.15, camera_height_m: float = 1.4, max_points: int = 400_000,
+               max_radius_m: float = 6.0) -> Dict:
     """Returns dict with grid (H,W) uint8, origin_xy, cell, cam_traj_xy, frame transform, and a point subsample."""
     d = np.load(npz_path)
     ext = d["extrinsic"].astype(np.float64)
@@ -83,8 +84,9 @@ def build_grid(npz_path: str, cell: float = 0.15, camera_height_m: float = 1.4, 
     floor_m = (hz > -0.15) & (hz < 0.15)
     obst_m = (hz >= 0.15) & (hz <= 1.8)
     xy = Pl[:, :2]
-    lo = np.minimum(np.percentile(xy, 1, axis=0), cam_l[:, :2].min(0)) - 0.5
-    hi = np.maximum(np.percentile(xy, 99, axis=0), cam_l[:, :2].max(0)) + 0.5
+    # crop to the neighbourhood of the walked path (max_radius_m around the trajectory)
+    lo = cam_l[:, :2].min(0) - max_radius_m
+    hi = cam_l[:, :2].max(0) + max_radius_m
     inb = (xy[:, 0] >= lo[0]) & (xy[:, 0] < hi[0]) & (xy[:, 1] >= lo[1]) & (xy[:, 1] < hi[1])
     nx, ny = (np.ceil((hi - lo) / cell)).astype(int)
     nx, ny = int(min(nx, 400)), int(min(ny, 400))
