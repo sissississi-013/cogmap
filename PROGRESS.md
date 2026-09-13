@@ -86,3 +86,7 @@
 - `Error code: 429 - You have no credits remaining` from OpenAI during out/final_check. Pipeline degraded gracefully (blob landmarks, LLM repair skipped, reflector skipped). Storyboard checklist step 0 tells Sissi to add credits or use a valid Anthropic key. Installing torch+transformers for an OWLv2 local detector fallback (no API needed).
 - 04:23 OWLv2 local detector validated end-to-end on the office scan (12 objects, 58 s, no API). detect_all auto-falls back when the API detector fails; COGMAP_DETECTOR=owlv2 forces it. torch/transformers added to requirements.
 - 04:26 Found evaluate_map spending minutes in a blocking Weave flush (trace-URL lookup); removed → 6.9 s per real-map evaluation with URL still resolved. Final morning-path check relaunched (out/final_check) with fast code + OWLv2 fallback (OpenAI credits exhausted).
+
+## 04:30 PDT — FINAL MORNING-PATH CHECK PASSED (iteration 14)
+- `./run_venue.sh footage/fallback/luxury_room_18s.mp4 out/final_check` from scratch, no API credits: 04:25:32 → 04:29:20. Scan (VGGT 52 s + OWLv2 90 s, 12 labelled objects) → loop v0 100% → explored → couch blocks corridor (8 collisions) → v2 100%/0 → coffee_table moved: patrol pre-empted → v5 100%/0 → stale obstacle 92% → v7; leaderboard + Weave images → Go2 walk clip → 37 s reel → Nav2 NavFn plan SUCCEEDED (26 poses) → nav2_proof/nav2_path.png.
+- Everything Sissi needs in the morning: record venue → `./run_venue.sh footage/raw/venue.mov out/venue` → files it prints; docs/demo-storyboard.md.
