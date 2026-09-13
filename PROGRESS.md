@@ -27,3 +27,9 @@
 - 10 tests green. Genesis Go2 B-roll on the scanned map: out/lux/go2_on_map.mp4 (re-rendering with 30 cm blocks).
 - docs/demo-storyboard.md written (morning checklist for Sissi).
 - Running: out/lux (real map, relaunched with fixes), out/synth_full2 (regression).
+
+## 04:00 PDT — robustness + ablation (iteration 1 continues)
+- Portrait 9:16 clip scan works (out/portrait: 12 objects, 12 tasks, 127 s). VGGT retry + task fallbacks + clear errors added.
+- Synthetic ablation done: rule-only recovers all rounds too; LLM ops are evidence-gated (README table added).
+- Real-map issue found: when the blocker cut the only known route, agents probed unknown cells which the simulated truth treated as walls → persistent collisions. Fix: simulated truth extends floor 3 cells beyond seen floor; unknown-traversal cost raised to 4. Relaunched out/lux and out/tum loops with the fix (pending).
+- Per-evaluation Weave call URLs now recorded in loop_result.json and shown in the dashboard.

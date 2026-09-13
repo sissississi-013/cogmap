@@ -70,6 +70,21 @@ stale obstacle was gone, and the map was repaired **before any task failed** (0 
 Real-scan results (luxury living room clip, TUM office sequence) are in `out/lux/` and `out/tum/` and on the Weave
 leaderboard; see below.
 
+
+### Ablation (synthetic apartment): what each part of the loop buys
+
+Cells are `final success / repairs needed / agent steps to recover`.
+
+| variant | round 1 (door blocked) | round 2 (couch moved) | round 3 (stale obstacle) | round 4 (door blocked) |
+|---|---|---|---|---|
+| rule repair only, no patrols | 100% / 1 / 681 | 100% / 1 / 868 | 100% / 1 / 519 | 94% / 1 / 737 |
+| rule + LLM repair, patrols on | 100% / 1 / 681 | 100% / 1 / 902 | 100% / 0 / 574 | 94% / 1 / 860 |
+
+The deterministic repair already recovers every change; the LLM's role is proposing *scene-graph* explanations (e.g. renaming
+an unknown blob back to "couch") and it is gated by evidence, so it never makes things worse (the last synthetic run: every
+LLM proposal without observation support was rejected). The outer loop shows in round 3: with patrols, the stale obstacle
+is removed before any task runs (0 repairs, 574 steps vs 519 steps for a full task run + repair without patrols).
+
 ## What you see in the demo
 
 | stage | artifact |
