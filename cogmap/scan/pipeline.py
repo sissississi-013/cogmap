@@ -171,11 +171,13 @@ def auto_perturbations(world: TrueWorld, tasks: List[dict]) -> List[dict]:
     goal object moves across the room, then the blocker is removed again (stale map)."""
     if not world.objects:
         return []
-    by_size = sorted(world.objects.values(), key=lambda o: -len(o.cells))
-    blocker = by_size[0]
     goal_counts: Dict[str, int] = {}
     for t in tasks:
         goal_counts[t["goal"]] = goal_counts.get(t["goal"], 0) + 1
+    by_size = sorted(world.objects.values(), key=lambda o: -len(o.cells))
+    # blocker: the largest object that is NOT a task goal (so the change only cuts routes, it doesn't hide a goal)
+    non_goals = [o for o in by_size if goal_counts.get(o.name, 0) == 0]
+    blocker = non_goals[0] if non_goals else by_size[-1]
     mover_name = max((n for n in goal_counts if n != blocker.name), key=lambda n: goal_counts[n], default=None)
     if mover_name is None:
         mover_name = by_size[1].name if len(by_size) > 1 else blocker.name
