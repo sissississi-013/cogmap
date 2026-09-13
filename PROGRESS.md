@@ -81,3 +81,6 @@
 - 04:17 PROOF 2: Nav2 NavFn planner_server + static costmap plan a 178-pose path on the exported office map (Docker, cached image cogmap-nav2). scripts/nav2_plan.sh, docs/proof/nav2_planner.log. README/SUBMISSION/storyboard updated.
 - 04:18 Nav2 path captured (178 poses) and drawn on the map: docs/img/nav2_path.png, docs/proof/nav2_path.yaml.
 - 04:20 scripts/draw_nav2_path.py (path image per run), nav2_plan.sh draws it, run_venue.sh runs the Nav2 proof when Docker is up, dashboard shows it.
+
+## 04:20 PDT — ⚠️ OPENAI CREDITS EXHAUSTED (iteration 12)
+- `Error code: 429 - You have no credits remaining` from OpenAI during out/final_check. Pipeline degraded gracefully (blob landmarks, LLM repair skipped, reflector skipped). Storyboard checklist step 0 tells Sissi to add credits or use a valid Anthropic key. Installing torch+transformers for an OWLv2 local detector fallback (no API needed).
