@@ -1,6 +1,7 @@
 # CogMap — self-repairing cognitive maps for robots, from a phone walkthrough
 
 > **CoreWeave Hacks 2026 (Agent Loops)** · Track: Best Use of Weave · eligible for Best Loop Design
+> [![tests](https://github.com/sissississi-013/cogmap/actions/workflows/tests.yml/badge.svg)](https://github.com/sissississi-013/cogmap/actions/workflows/tests.yml)
 > Weave project: https://wandb.ai/sissiwang-maglev/cogmap/weave
 
 Walk through any space with your phone. **CogMap** turns the video into a cognitive map (a metric occupancy grid plus a
