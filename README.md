@@ -225,7 +225,7 @@ run_demo.py     CLI · dashboard.py  marimo · tests/  pytest
 - We claim Nav2-compatibility of the exported artifact, not that Unitree's proprietary app ingests it. **Verified:** the
   exported `map.pgm`/`map.yaml` load in a stock ROS 2 Humble `nav2_map_server` and are published on `/map`
   (`scripts/nav2_check.sh`, `docs/proof/nav2_map_server.log`), and Nav2's own **NavFn planner** (`planner_server` +
-  static global costmap) plans a 178-pose path on it from a task start to the `bookshelf_2` waypoint
+  static global costmap) plans a 176-pose path on it from a task start to the `bookshelf_2` waypoint
   (`scripts/nav2_plan.sh out/office`, `docs/proof/nav2_planner.log`: `Goal finished with status: SUCCEEDED`).
 
   <p align="center"><img src="docs/img/nav2_map.png" width="46%"> <img src="docs/img/nav2_path.png" width="46%"><br><sub>Left: the exported map.pgm with the named waypoints, exactly as map_server publishes it. Right: the path Nav2's NavFn planner computed on it (start → bookshelf_2), raw result in <code>docs/proof/nav2_path.yaml</code>.</sub></p>
