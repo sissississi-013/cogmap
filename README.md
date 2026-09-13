@@ -175,6 +175,7 @@ uv venv .venv --python 3.12 && source .venv/bin/activate
 uv pip install -r requirements.txt
 echo "WANDB_API_KEY=..." > .env            # Weave
 export OPENAI_API_KEY=...                 # repair agent + VLM detector (Anthropic also supported: ANTHROPIC_API_KEY)
+# no API credits? the scan falls back to a local OWLv2 detector automatically (COGMAP_DETECTOR=owlv2 forces it; ~2 s/frame on CPU)
 modal setup                               # once; then deploy the GPU reconstruction app
 python -m modal deploy cogmap/scan/vggt_modal.py
 
@@ -201,7 +202,7 @@ cogmap/
     frames.py       ffmpeg keyframes
     vggt_modal.py   Modal app: VGGT-1B on an A10G (poses, depth, point maps) — ~6 s GPU inference for 48 frames
     grid.py         floor-plane fit, scale normalisation, occupancy grid, cropping
-    objects.py      VLM detection per keyframe -> point-map anchoring -> cross-frame merge -> footprints
+    objects.py      VLM detection per keyframe (gpt-5 / Claude, or local OWLv2 fallback) -> point-map anchoring -> merge -> footprints
     export_nav2.py  map.pgm + map.yaml + waypoints.json
     pipeline.py     scan_to_world(), auto_perturbations() for arbitrary scanned spaces
 run_demo.py     CLI · dashboard.py  marimo · tests/  pytest
