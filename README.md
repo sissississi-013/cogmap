@@ -209,6 +209,10 @@ run_demo.py     CLI · dashboard.py  marimo · tests/  pytest
 - **marimo** — `dashboard.py` results dashboard.
 - **OpenAI / Anthropic** — repair agent (`gpt-5` with JSON output; Claude when `ANTHROPIC_API_KEY` is valid) and VLM detector.
 
+## Demo-day runbook
+`docs/demo-storyboard.md` has the 2-minute recording storyboard, the 3-minute live script, and the morning checklist
+(record the venue → `./run_venue.sh footage/raw/venue.mov out/venue` → open the files it prints).
+
 ## Honest limitations
 
 - The scan's scale is up to a global factor (VGGT is scale-free); we normalise by assuming the phone is ~1.4 m above the
