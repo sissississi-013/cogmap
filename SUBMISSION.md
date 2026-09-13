@@ -31,7 +31,9 @@ map is exported as the ROS 2 Nav2 artifact real robots (Unitree Go2/G1 stacks) l
   registered in the coding agent.
 - **Modal:** GPU 3D reconstruction (VGGT-1B) as a deployed app with warm containers (~6 s GPU time per scan).
 - **marimo:** `dashboard.py` results dashboard (curves, tables, scan overview, swarm video, changelog, Nav2 export).
-- **OpenAI gpt-5 (and Claude when a key is available):** repair agent (structured scene-graph ops) and VLM object detector.
+- **OpenAI gpt-5 (and Claude when a key is available):** VLM object detector for the scan, evidence-gated scene-graph
+  repair proposals (0 applied in the reported runs: the deterministic repair covered every case; proposals without
+  observation support are rejected), and the Reflector post-mortem written into the map changelog.
 - Protocols/frameworks: no A2A/MCP at runtime; MCP used at build time (W&B MCP server in Claude Code).
 
 ## Reproduce in one command

@@ -66,3 +66,4 @@
 
 ## 04:05 PDT (iteration 9)
 - Office run with exploration finished: v0 100% → explored (+140 cells, SPL .89→.95) → change1 88%/24c → 100% → change2 75%/9c → 100% → change3 caught by patrol (100%/7c) → 100%; known cells 2125 → 2595. Real-map ablation table (full vs rule-only) added to README; docs/img refreshed from out/office.
+- LLM ops applied: 0 across office/synthetic runs (1 rejected). README/SUBMISSION state this honestly; the LLM's contribution is the scan labels + post-mortem memory.

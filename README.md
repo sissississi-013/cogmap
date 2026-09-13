@@ -137,9 +137,10 @@ Cells are `final success / repairs needed / agent steps to recover`.
 | rule repair only, no patrols | 100% / 1 / 681 | 100% / 1 / 868 | 100% / 1 / 519 | 94% / 1 / 737 |
 | rule + LLM repair, patrols on | 100% / 1 / 681 | 100% / 1 / 902 | 100% / 0 / 574 | 94% / 1 / 860 |
 
-The deterministic repair already recovers every change; the LLM's role is proposing *scene-graph* explanations (e.g. renaming
-an unknown blob back to "couch") and it is gated by evidence, so it never makes things worse (the last synthetic run: every
-LLM proposal without observation support was rejected). The outer loop shows in round 3: with patrols, the stale obstacle
+**Honest note on the LLM:** the deterministic Cartographer explained every failure in these runs, so the Reasoner's
+scene-graph proposals were either empty or rejected by the Verifier (0 applied, 1 rejected across the office and synthetic
+runs). The loop does not depend on an LLM to self-correct; the LLM's measurable contribution here is the post-mortem memory
+(`map_changelog.md`) and the object labels from the scan. The outer loop shows in round 3: with patrols, the stale obstacle
 is removed before any task runs (0 repairs, 574 steps vs 519 steps for a full task run + repair without patrols).
 
 <p align="center"><img src="docs/img/swarm.gif" width="90%"><br><sub>The loop on the TUM office scan, one command: v0 → desk dragged into the corridor (red X = collisions) → repaired → later changes caught by patrols (orange path).</sub></p>
