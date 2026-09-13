@@ -147,3 +147,22 @@ def render_all(out_dir: str):
         print("animation:", animate(out_dir))
     except Exception as e:  # noqa: BLE001
         print("animation failed:", e)
+
+
+def pointcloud_html(points_xyz, cam_traj_xy, out_path: str, title: str = "CogMap world model (VGGT point map)") -> str:
+    import plotly.graph_objects as go
+    P = np.asarray(points_xyz)
+    if len(P) > 60000:
+        P = P[np.random.default_rng(0).choice(len(P), 60000, replace=False)]
+    cam = np.asarray(cam_traj_xy)
+    fig = go.Figure()
+    fig.add_trace(go.Scatter3d(x=P[:, 0], y=P[:, 1], z=P[:, 2], mode="markers",
+                               marker=dict(size=1.6, color=np.clip(P[:, 2], -0.3, 2.5), colorscale="Viridis", opacity=0.8),
+                               name="points"))
+    if len(cam):
+        fig.add_trace(go.Scatter3d(x=cam[:, 0], y=cam[:, 1], z=np.full(len(cam), 1.4), mode="lines+markers",
+                                   line=dict(color="red", width=5), marker=dict(size=3, color="red"), name="phone path"))
+    fig.update_layout(title=title, scene=dict(aspectmode="data", xaxis_title="x (m)", yaxis_title="y (m)", zaxis_title="height (m)"),
+                      margin=dict(l=0, r=0, t=40, b=0), template="plotly_dark")
+    fig.write_html(out_path, include_plotlyjs="cdn")
+    return out_path

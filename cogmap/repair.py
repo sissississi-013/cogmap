@@ -127,15 +127,36 @@ Rules: only use cells inside the grid; never mark a cell free that robots observ
 Respond with JSON: {"ops":[...], "summary": "<one sentence for the human changelog>"}"""
 
 
-def _anthropic_client():
-    import anthropic
-    return anthropic.Anthropic()
+def _chat_json(system: str, user: str, model: Optional[str] = None) -> Tuple[str, str]:
+    """Call an LLM and return (raw_text, model_used). Tries Anthropic first, falls back to OpenAI."""
+    errors = []
+    if os.environ.get("ANTHROPIC_API_KEY") and os.environ.get("COGMAP_LLM", "auto") in ("auto", "anthropic"):
+        try:
+            import anthropic
+            m = model or os.environ.get("COGMAP_ANTHROPIC_MODEL", "claude-sonnet-5")
+            msg = anthropic.Anthropic().messages.create(model=m, max_tokens=1500, system=system,
+                                                        messages=[{"role": "user", "content": user}])
+            return "".join(b.text for b in msg.content if getattr(b, "type", "") == "text"), m
+        except Exception as e:  # noqa: BLE001
+            errors.append(f"anthropic: {e}")
+    if os.environ.get("OPENAI_API_KEY"):
+        try:
+            from openai import OpenAI
+            m = os.environ.get("COGMAP_OPENAI_MODEL", "gpt-5")
+            r = OpenAI().chat.completions.create(model=m, messages=[{"role": "system", "content": system},
+                                                                    {"role": "user", "content": user}],
+                                                 response_format={"type": "json_object"}, max_completion_tokens=4000,
+                                                 reasoning_effort="low")
+            return r.choices[0].message.content or "", m
+        except Exception as e:  # noqa: BLE001
+            errors.append(f"openai: {e}")
+    raise RuntimeError("no LLM provider worked: " + " | ".join(errors))
 
 
 @weave.op
 def llm_propose_ops(belief_json: dict, failures: List[dict], removed: List[dict], added: List[dict],
-                    model: str = "claude-sonnet-5") -> dict:
-    """Ask Claude for scene-graph ops. Returns {"ops": [...], "summary": str, "raw": str}."""
+                    model: Optional[str] = None) -> dict:
+    """Ask an LLM for scene-graph ops. Returns {"ops": [...], "summary": str, "raw": str, "model": str}."""
     objs = {k: {"anchor": v["anchor"], "n_cells": len(v["cells"]), "kind": v["kind"]} for k, v in belief_json["objects"].items()}
     H = len(belief_json["grid"]); W = len(belief_json["grid"][0])
     fail_summary: Dict[str, int] = {}
@@ -149,16 +170,14 @@ def llm_propose_ops(belief_json: dict, failures: List[dict], removed: List[dict]
         "rule_repair_removed_objects": removed,
         "rule_repair_added_unknown_obstacles": added,
     }, indent=1)
-    client = _anthropic_client()
-    msg = client.messages.create(model=model, max_tokens=1500, temperature=0, system=REPAIR_SYSTEM,
-                                 messages=[{"role": "user", "content": user}])
-    raw = "".join(b.text for b in msg.content if getattr(b, "type", "") == "text")
+    raw, used = _chat_json(REPAIR_SYSTEM, user, model)
     try:
         start, end = raw.find("{"), raw.rfind("}")
         parsed = json.loads(raw[start:end + 1])
-    except Exception:
+    except Exception:  # noqa: BLE001
         parsed = {"ops": [], "summary": "LLM output unparseable"}
     parsed["raw"] = raw
+    parsed["model"] = used
     return parsed
 
 
