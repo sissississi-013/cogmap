@@ -26,7 +26,7 @@ One slide max: the two-loop diagram from README.md.
 
 ## Morning checklist (Sissi)
 1. Record the venue: 60–90 s, slow, chest height, pan gently, include furniture; AirDrop → `footage/raw/venue.mov`.
-2. `source .venv/bin/activate && set -a && source .env && set +a && python -u run_demo.py --video footage/raw/venue.mov --out out/venue`
+2. `./run_venue.sh footage/raw/venue.mov out/venue`  (does everything: scan, loop, visuals, B-roll)
    (≈2 min scan + ≈3 min loop). If VGGT is cold it takes ~60 s longer.
 3. Optional B-roll: `spikes/genesis_sim/.venv/bin/python cogmap/broll_genesis.py out/venue/scan/belief_v0.json out/venue/go2_on_map.mp4`
 4. Fix `ANTHROPIC_API_KEY` in `~/.zshrc` if you want Claude as the repair agent (`COGMAP_LLM=anthropic`); otherwise gpt-5 is used.

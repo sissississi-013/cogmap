@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# One-shot morning script: phone clip -> CogMap loop -> visuals -> Go2 B-roll.  Usage: ./run_venue.sh footage/raw/venue.mov [out/venue]
+set -euo pipefail
+VIDEO="${1:?usage: ./run_venue.sh <video> [out_dir]}"; OUT="${2:-out/venue}"
+cd "$(dirname "$0")"
+source .venv/bin/activate
+set -a; source .env; set +a
+mkdir -p "$OUT"
+echo "== CogMap on $VIDEO -> $OUT  ($(date +%H:%M:%S))"
+python -u run_demo.py --video "$VIDEO" --out "$OUT" --n-tasks 12 2>&1 | tee "$OUT/log.txt" | grep -E "^\[scan\]|^\[eval\]|=== Round|round .* done|patrol detected|repair #|leaderboard|Traceback|weave images"
+if [ -x spikes/genesis_sim/.venv/bin/python ]; then
+  echo "== Go2 B-roll"; spikes/genesis_sim/.venv/bin/python -u cogmap/broll_genesis.py "$OUT/scan/belief_v0.json" "$OUT/go2_on_map.mp4" cpu | tail -1 || true
+fi
+echo "== done ($(date +%H:%M:%S)). Open: $OUT/scan/scan_overview.png  $OUT/curve.png  $OUT/swarm.mp4  $OUT/scan/pointcloud.html  ->  marimo run dashboard.py"

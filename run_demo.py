@@ -15,6 +15,7 @@ def main():
     ap.add_argument("--no-llm", action="store_true")
     ap.add_argument("--no-patrols", action="store_true")
     ap.add_argument("--n-tasks", type=int, default=16)
+    ap.add_argument("--frames", type=int, default=48, help="keyframes sent to VGGT (48 fits an A10G; up to ~80)")
     ap.add_argument("--project", type=str, default="cogmap")
     ap.add_argument("--no-viz", action="store_true")
     args = ap.parse_args()
@@ -25,7 +26,7 @@ def main():
     from cogmap.loop import CogMapLoop
     if args.video:
         from cogmap.scan.pipeline import scan_to_world
-        world, belief, perturbations, tasks = scan_to_world(args.video, args.out, n_tasks=args.n_tasks)
+        world, belief, perturbations, tasks = scan_to_world(args.video, args.out, n_tasks=args.n_tasks, n_frames=args.frames)
     else:
         world = make_synthetic_apartment()
         belief = BeliefMap.from_world(world, name="synthetic_apartment")

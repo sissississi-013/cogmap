@@ -217,6 +217,11 @@ def scan_to_world(video: str, out_dir: str, n_frames: int = 48, cell: float = 0.
     grid = _clean_grid(g["grid"])
     save_grid_png(grid, os.path.join(sd, "occupancy_grid.png"))
     np.save(os.path.join(sd, "points_xyz.npy"), g["points_xyz"])
+    try:
+        from ..viz import pointcloud_html
+        pointcloud_html(g["points_xyz"], g["cam_traj_xy"], os.path.join(sd, "pointcloud.html"))
+    except Exception as e:  # noqa: BLE001
+        print("[scan] pointcloud html failed:", e)
     json.dump({k: v for k, v in g.items() if k not in ("grid", "points_xyz")}, open(os.path.join(sd, "grid_meta.json"), "w"))
     print(f"[scan] grid {grid.shape} cell={cell}m stats={g['stats']} frame={g['frame']['note']} ({time.time()-t0:.1f}s)")
     # semantic objects
@@ -268,5 +273,10 @@ def scan_to_world(video: str, out_dir: str, n_frames: int = 48, cell: float = 0.
     json.dump(tasks, open(os.path.join(sd, "tasks.json"), "w"))
     perts = auto_perturbations(world, tasks)
     ex = export_nav2(belief, os.path.join(sd, "nav2"), resolution=cell, origin_xy=tuple(g["origin_xy"]))
+    try:
+        from ..viz import scan_overview
+        scan_overview(sd)
+    except Exception as e:  # noqa: BLE001
+        print("[scan] overview plot failed:", e)
     print(f"[scan] nav2 export: {ex}  tasks={len(tasks)} perturbations={len(perts)} total {time.time()-t0:.1f}s")
     return world, belief, perts, tasks
