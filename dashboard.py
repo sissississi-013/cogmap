@@ -61,6 +61,10 @@ def _(mo, os, run):
         if os.path.exists(os.path.join(scan, "nav2", "map.yaml")):
             items.append(mo.md("### Exported for a real robot (ROS 2 Nav2 map_server)"))
             items.append(mo.md("```yaml\n" + open(os.path.join(scan, "nav2", "map.yaml")).read() + "```"))
+        rescan = os.path.join(run, "rescan", "rescan_diff.png")
+        if os.path.exists(rescan):
+            items.append(mo.md("### Real change: second walkthrough registered to the map (A | B aligned | difference)"))
+            items.append(mo.image(rescan, width=1000))
         nav2png = os.path.join(run, "nav2_proof", "nav2_path.png")
         if os.path.exists(nav2png):
             items.append(mo.md("### Proof: a stock ROS 2 Nav2 planner planned on this map"))
