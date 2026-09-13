@@ -9,8 +9,8 @@ moves the couch — the swarm's *failures* drive an automatic map repair so navi
 changes the swarm learns *where* the world tends to change and heals faster. The map is exported as the exact artifact a
 Nav2 robot (Unitree Go2/G1 stacks) loads today.
 
-<p align="center"><img src="docs/img/scan_overview.png" width="46%"> <img src="docs/img/curve.png" width="52%"></p>
-<p align="center"><sub>Left: cognitive map v0 built from an 18-second phone clip of a living room (VGGT point map → occupancy grid, VLM-labelled furniture anchored through the point map, phone path in red). Right: the synthetic-apartment loop — every red band is a world change, every recovery is a new map version evaluated in Weave.</sub></p>
+<p align="center"><img src="docs/img/scan_overview.png" width="40%"> <img src="docs/img/tum_curve.png" width="58%"></p>
+<p align="center"><sub>Left: cognitive map v0 built from an 18-second phone clip of a living room (VGGT point map → occupancy grid, VLM-labelled furniture anchored through the point map, phone path in red). Right: the loop on a real office scan — every red band is a world change, every recovery is a new map version evaluated in Weave; the green line is the map growing as scouts explore between changes; change 3 was caught by a patrol before any task failed.</sub></p>
 
 ## The loops (what makes it self-improving)
 
