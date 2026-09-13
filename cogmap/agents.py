@@ -214,7 +214,7 @@ class Swarm:
             results.append(agent.run(task))
         return results
 
-    def patrol(self, belief: BeliefMap, targets: List[Cell], start: Cell, max_steps: int = 300) -> EpisodeResult:
+    def patrol(self, belief: BeliefMap, targets: List[Cell], start: Cell, max_steps: int = 800) -> EpisodeResult:
         """Send one patrol agent through a list of target cells (verification sweep)."""
         agent = NavAgent("patrol", belief, self.world, max_steps=max_steps)
         res = EpisodeResult("patrol", "patrol", "patrol", True, 0, 0, 0, 0)

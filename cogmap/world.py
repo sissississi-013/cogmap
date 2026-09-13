@@ -298,12 +298,14 @@ def relocate_object(world: TrueWorld, obj_name: str, new_anchor: Cell) -> dict:
 
 
 def scripted_perturbations(world: TrueWorld) -> List[dict]:
-    """Three rounds of scripted changes for the synthetic apartment demo."""
+    """Four rounds of scripted changes for the synthetic apartment demo (world stays connected)."""
     return [
         {"fn": block_door, "args": ["door_living_bedroom", "coffee_table"],
          "story": "Someone dragged the coffee table into the living-room/bedroom doorway."},
         {"fn": relocate_object, "args": ["couch", (24, 40)],
          "story": "The couch was moved from the living room into the hallway."},
-        {"fn": block_door, "args": ["door_kitchen_hall", "laundry_basket"],
-         "story": "A laundry basket now sits in the kitchen/hallway doorway."},
+        {"fn": relocate_object, "args": ["coffee_table", (8, 8)],
+         "story": "The coffee table went back to the living room: the doorway is open again (stale obstacle in the map)."},
+        {"fn": block_door, "args": ["door_bedroom_hall", "laundry_basket"],
+         "story": "A laundry basket now blocks the bedroom/hallway doorway."},
     ]
