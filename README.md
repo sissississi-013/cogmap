@@ -226,6 +226,8 @@ run_demo.py     CLI · dashboard.py  marimo · tests/  pytest
   exported `map.pgm`/`map.yaml` load in a stock ROS 2 Humble `nav2_map_server` and are published on `/map`
   (`scripts/nav2_check.sh out/<run>/scan/nav2`, log in `docs/proof/nav2_map_server.log`).
 
+  <p align="center"><img src="docs/img/nav2_map.png" width="55%"><br><sub>The exported map.pgm with the named waypoints, exactly as map_server publishes it.</sub></p>
+
 ## Prior work we build on
 
 VGGT (Wang et al., CVPR 2025), ConceptGraphs / VLMaps (open-vocabulary semantic maps), GraphPad and the
