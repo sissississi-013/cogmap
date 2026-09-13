@@ -59,10 +59,75 @@ def detect_in_frame(frame_path: str, model: Optional[str] = None) -> dict:
     return {"frame": os.path.basename(frame_path), "objects": objs, "raw": raw[:2000]}
 
 
+_OWL = {}
+
+
+def _owlv2():
+    """Lazy-load OWLv2 (open-vocabulary detector, CPU-friendly, no API key)."""
+    if "model" not in _OWL:
+        import torch
+        from transformers import Owlv2Processor, Owlv2ForObjectDetection
+        name = os.environ.get("COGMAP_OWLV2", "google/owlv2-base-patch16-ensemble")
+        _OWL["proc"] = Owlv2Processor.from_pretrained(name)
+        _OWL["model"] = Owlv2ForObjectDetection.from_pretrained(name).eval()
+        _OWL["torch"] = torch
+    return _OWL
+
+
+OWL_QUERIES = ["a couch", "an armchair", "a chair", "a table", "a coffee table", "a dining table", "a desk", "a bed", "a wardrobe",
+               "a cabinet", "a bookshelf", "a tv", "a fridge", "a kitchen island", "an oven", "a potted plant", "a box", "a sink",
+               "a toilet", "a washing machine", "a trash can", "a stool", "a bench", "a piano", "a lamp"]
+OWL_NAMES = ["couch", "armchair", "chair", "table", "coffee_table", "dining_table", "desk", "bed", "wardrobe", "cabinet", "bookshelf",
+             "tv", "fridge", "kitchen_island", "oven", "plant", "box", "sink", "toilet", "washing_machine", "trash_can", "stool",
+             "bench", "piano", "lamp"]
+
+
+@weave.op
+def detect_in_frame_owlv2(frame_path: str, threshold: float = 0.25, max_objects: int = 8) -> dict:
+    """Local open-vocabulary detection (OWLv2). Same output format as detect_in_frame."""
+    from PIL import Image
+    o = _owlv2(); torch = o["torch"]
+    im = Image.open(frame_path).convert("RGB")
+    inputs = o["proc"](text=[OWL_QUERIES], images=im, return_tensors="pt")
+    with torch.no_grad():
+        out = o["model"](**inputs)
+    # OWLv2 pads the image to a square; post-process wants the padded size
+    side = max(im.size)
+    pp = getattr(o["proc"], "post_process_grounded_object_detection", None) or o["proc"].post_process_object_detection
+    try:
+        res = pp(out, threshold=threshold, target_sizes=torch.tensor([[side, side]]), text_labels=[OWL_QUERIES])[0]
+    except TypeError:
+        res = pp(out, threshold=threshold, target_sizes=torch.tensor([[side, side]]))[0]
+    objs = []
+    labels = res["labels"].tolist() if hasattr(res["labels"], "tolist") else res["labels"]
+    labels = [OWL_QUERIES.index(l) if isinstance(l, str) and l in OWL_QUERIES else l for l in labels]
+    for score, label, box in sorted(zip(res["scores"].tolist(), labels, res["boxes"].tolist()), key=lambda t: -t[0]):
+        x0, y0, x1, y1 = box
+        if (x1 - x0) * (y1 - y0) > 0.6 * im.size[0] * im.size[1]:
+            continue
+        objs.append({"name": OWL_NAMES[label], "score": round(score, 3),
+                     "box": [int(1000 * x0 / im.size[0]), int(1000 * y0 / im.size[1]), int(1000 * min(x1, im.size[0]) / im.size[0]), int(1000 * min(y1, im.size[1]) / im.size[1])]})
+        if len(objs) >= max_objects:
+            break
+    return {"frame": os.path.basename(frame_path), "objects": objs, "raw": "owlv2"}
+
+
 def detect_all(frames: List[str], every: int = 2, workers: int = 6) -> List[dict]:
+    """API VLM first (fast, parallel); on API failure (no credits / bad key) fall back to local OWLv2 for all frames."""
     sel = frames[::every]
-    with ThreadPoolExecutor(workers) as ex:
-        return list(ex.map(detect_in_frame, sel))
+    mode = os.environ.get("COGMAP_DETECTOR", "auto")
+    if mode != "owlv2":
+        try:
+            probe = detect_in_frame(sel[0])
+            if probe["objects"] or "error" not in probe.get("raw", "").lower():
+                with ThreadPoolExecutor(workers) as ex:
+                    rest = list(ex.map(detect_in_frame, sel[1:]))
+                return [probe] + rest
+        except Exception as e:  # noqa: BLE001
+            print(f"[scan] API detector unavailable ({str(e)[:80]}...) -> local OWLv2")
+            if mode == "api":
+                raise
+    return [detect_in_frame_owlv2(f) for f in sel]
 
 
 def _norm(name: str) -> str:
