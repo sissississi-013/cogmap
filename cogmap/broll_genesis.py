@@ -20,8 +20,7 @@ def main(belief_path: str, out: str, backend: str = "cpu", n_steps: int = 500):
     r0, r1, c0, c1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
     g = grid[r0:r1, c0:c1]
     HS, VS = 0.15, 0.01
-    h = np.where(g == 2, 0.45, 0.0)                       # occupied -> 45 cm blocks; free/unknown -> floor
-    h[g == 0] = 0.08                                      # unknown -> slightly raised (visual hint)
+    h = np.where(g == 2, 0.30, 0.0)                       # occupied -> 30 cm blocks (furniture footprints); free/unknown -> floor
     hf = np.round(h / VS).astype(np.int32)
     gs.init(backend=getattr(gs, backend), logging_level="warning")
     scene = gs.Scene(sim_options=gs.options.SimOptions(dt=0.01, substeps=2),
@@ -34,7 +33,7 @@ def main(belief_path: str, out: str, backend: str = "cpu", n_steps: int = 500):
     ri, ci = np.unravel_index(int(np.argmax(room)), room.shape)
     spawn = np.array([ri * HS, ci * HS, 0.45])
     robot = scene.add_entity(gs.morphs.URDF(file="urdf/go2/urdf/go2.urdf", pos=tuple(spawn), quat=(1, 0, 0, 0)))
-    cam = scene.add_camera(res=(960, 540), pos=tuple(spawn + [2.2, -2.2, 1.4]), lookat=tuple(spawn), fov=45, GUI=False)
+    cam = scene.add_camera(res=(960, 540), pos=tuple(spawn + [2.2, -2.2, 1.4]), lookat=tuple(spawn), fov=50, GUI=False)
     t0 = time.time()
     scene.build()
     print(f"build {time.time()-t0:.1f}s, grid {g.shape}, spawn cell ({ri},{ci})")
@@ -57,8 +56,8 @@ def main(belief_path: str, out: str, backend: str = "cpu", n_steps: int = 500):
         robot.control_dofs_position(q, dofs)
         scene.step()
         p = np.asarray(robot.get_pos().cpu())
-        ang = 0.004 * i
-        cam.set_pose(pos=p + np.array([2.6 * np.cos(ang), 2.6 * np.sin(ang), 1.5]), lookat=p + np.array([0, 0, 0.1]))
+        ang = 0.003 * i
+        cam.set_pose(pos=p + np.array([3.0 * np.cos(ang), 3.0 * np.sin(ang), 2.0]), lookat=p + np.array([0, 0, 0.1]))
     cam.stop_recording()
     print("wrote", out, f"in {time.time()-t0:.1f}s")
 

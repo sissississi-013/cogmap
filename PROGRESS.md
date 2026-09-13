@@ -21,3 +21,9 @@
 - Running: `run_demo.py --video luxury_room_18s.mp4 --out out/lux` (full loop on real map; stdout is buffered under nohup — use `python -u` next time).
 - Written: dashboard.py (marimo), README.md draft, requirements.txt, docs/img/.
 - NEXT: verify out/lux loop result + curve; Genesis Go2 B-roll on the scanned heightfield (optional); SUBMISSION.md; final clean run; push.
+
+## 03:50 PDT — fixes after first real-map loop (iteration 1 continues)
+- Bugs fixed: (1) agents planned through UNKNOWN cells → collisions at v0; now plan through known-FREE first (`NavAgent._plan`) and goal cells prefer FREE neighbours; (2) run_demo video path used random `default_tasks` (unreachable starts) → now `scan_to_world` returns reachability-checked tasks; (3) LLM repair undid rule-repair (removed a re-identified couch) → strict evidence-based validation for add/remove/relocate + prompt tells the LLM what rule repair already did; (4) perturbations on scanned maps now use the largest object as blocker and the most-targeted goal as mover; (5) recovery criterion relative to v0 baseline, stop when a repair makes no progress.
+- 10 tests green. Genesis Go2 B-roll on the scanned map: out/lux/go2_on_map.mp4 (re-rendering with 30 cm blocks).
+- docs/demo-storyboard.md written (morning checklist for Sissi).
+- Running: out/lux (real map, relaunched with fixes), out/synth_full2 (regression).

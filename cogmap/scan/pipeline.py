@@ -192,7 +192,7 @@ def auto_perturbations(world: TrueWorld, tasks: List[dict]) -> List[dict]:
 
 @weave.op
 def scan_to_world(video: str, out_dir: str, n_frames: int = 48, cell: float = 0.15, detect_every: int = 2,
-                  unknown_is_blocked: bool = True) -> Tuple[TrueWorld, BeliefMap, List[dict]]:
+                  unknown_is_blocked: bool = True, n_tasks: int = 12) -> Tuple[TrueWorld, BeliefMap, List[dict], List[dict]]:
     sd = os.path.join(out_dir, "scan")
     os.makedirs(sd, exist_ok=True)
     t0 = time.time()
@@ -243,8 +243,9 @@ def scan_to_world(video: str, out_dir: str, n_frames: int = 48, cell: float = 0.
         belief.stamp_object(o, OCCUPIED, o.confidence)
     belief.save(os.path.join(sd, "belief_v0.json"))
     json.dump(world.to_json(), open(os.path.join(sd, "world.json"), "w"))
-    tasks = reachable_tasks(world)
+    tasks = reachable_tasks(world, n=n_tasks)
+    json.dump(tasks, open(os.path.join(sd, "tasks.json"), "w"))
     perts = auto_perturbations(world, tasks)
     ex = export_nav2(belief, os.path.join(sd, "nav2"), resolution=cell, origin_xy=tuple(g["origin_xy"]))
     print(f"[scan] nav2 export: {ex}  tasks={len(tasks)} perturbations={len(perts)} total {time.time()-t0:.1f}s")
-    return world, belief, perts
+    return world, belief, perts, tasks

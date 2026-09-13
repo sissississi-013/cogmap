@@ -25,8 +25,7 @@ def main():
     from cogmap.loop import CogMapLoop
     if args.video:
         from cogmap.scan.pipeline import scan_to_world
-        world, belief, perturbations = scan_to_world(args.video, args.out)
-        tasks = default_tasks(world, args.n_tasks)
+        world, belief, perturbations, tasks = scan_to_world(args.video, args.out, n_tasks=args.n_tasks)
     else:
         world = make_synthetic_apartment()
         belief = BeliefMap.from_world(world, name="synthetic_apartment")

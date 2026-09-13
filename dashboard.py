@@ -33,9 +33,11 @@ def _(json, mo, os, run_sel):
     rounds = [{"round": r["round"], "story": r["story"], "repairs": r["repairs"], "steps to recover": r["steps_to_recover"],
                "final success": f"{r['final_success']:.0%}"} for r in res["rounds"]]
     lb = res.get("leaderboard")
-    weave_url = "https://wandb.ai/sissiwang-maglev/cogmap/weave"
+    wv = res.get("weave", {"project": "https://wandb.ai/sissiwang-maglev/cogmap/weave"})
+    links = "  ·  ".join(f"[Weave {k}]({v})" for k, v in wv.items())
     mo.vstack([
-        mo.md(f"## Run: `{run}`  ·  [Weave project]({weave_url})  ·  leaderboard ref: `{lb}`"),
+        mo.md(f"## Run: `{run}`  ·  {links}"),
+        mo.md(f"leaderboard object: `{lb}`  ·  tasks per evaluation: {res.get('n_tasks', '?')}  ·  loop wall time: {res.get('elapsed_s', '?')} s"),
         mo.hstack([mo.image(os.path.join(run, "curve.png")) if os.path.exists(os.path.join(run, "curve.png")) else mo.md("no curve yet"),
                    mo.image(os.path.join(run, "steps_to_recover.png")) if os.path.exists(os.path.join(run, "steps_to_recover.png")) else mo.md("")]),
         mo.md("### Timeline (one Weave Evaluation per row)"), mo.ui.table(rows, selection=None),
@@ -69,6 +71,10 @@ def _(mo, os, run):
         parts.append(mo.video(vid, controls=True, width=1000))
     else:
         parts.append(mo.md("no animation rendered yet"))
+    go2 = os.path.join(run, "go2_on_map.mp4") if run else ""
+    if os.path.exists(go2):
+        parts.append(mo.md("### Transfer: a Unitree Go2 (Genesis sim) dropped into the scanned map"))
+        parts.append(mo.video(go2, controls=True, width=640))
     cl = os.path.join(run, "map_changelog.md") if run else ""
     if os.path.exists(cl):
         parts.append(mo.md("### Map changelog (Reflector output)"))
