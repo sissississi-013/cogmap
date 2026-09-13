@@ -288,3 +288,34 @@ def scan_to_world(video: str, out_dir: str, n_frames: int = 48, cell: float = 0.
         print("[scan] overview plot failed:", e)
     print(f"[scan] nav2 export: {ex}  tasks={len(tasks)} perturbations={len(perts)} total {time.time()-t0:.1f}s")
     return world, belief, perts, tasks
+
+
+def rescan_perturbation(world: TrueWorld, belief: BeliefMap, video_b: str, out_dir: str, n_frames: int = 48, min_blob: int = 6) -> dict:
+    """Real-world change: a SECOND walkthrough (after furniture moved) becomes the new ground truth.
+    Scan B is registered to map A; confident differences are written into the simulated true world, so the swarm's
+    failures against the *real* change drive the repair. Returns a perturbation dict for CogMapLoop.run()."""
+    from .rescan import register, diff_observations, rescan_plot
+    sd = os.path.join(out_dir, "rescan")
+    os.makedirs(sd, exist_ok=True)
+    world_b, belief_b, _, _ = scan_to_world(video_b, os.path.join(out_dir, "rescan_b"), n_frames=n_frames)
+    reg = register(belief.grid, belief_b.grid)
+    aligned = reg["aligned"]
+    obs, summ = diff_observations(belief, aligned, min_blob=min_blob)
+    rescan_plot(belief, aligned, reg, os.path.join(sd, "rescan_diff.png"))
+    json.dump({"registration": {k: v for k, v in reg.items() if k != "aligned"}, "diff": summ}, open(os.path.join(sd, "rescan.json"), "w"))
+    np.save(os.path.join(sd, "aligned_b.npy"), aligned)
+    print(f"[rescan] registered B to A: angle={reg['angle']} scale={reg['scale']} shift={reg['shift']} score={reg['score']:.2f}; diff={summ}")
+
+    def apply(w: TrueWorld, *_):
+        changed = 0
+        for k, vals in obs.items():
+            r, c = json.loads(k)
+            v = vals[0]
+            if w.in_bounds((r, c)) and w.grid[r, c] != v:
+                w.grid[r, c] = v
+                w.static[r, c] = v
+                changed += 1
+        return {"kind": "rescan", "changed_cells": changed, "registration": {k: v for k, v in reg.items() if k != "aligned"}}
+
+    return {"fn": apply, "args": [],
+            "story": f"A second walkthrough was recorded after the space changed: {summ['new_occupied']} cells newly occupied, {summ['new_free']} newly free (registered at {reg['angle']}°, score {reg['score']:.2f})."}

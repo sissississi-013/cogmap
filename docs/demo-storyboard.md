@@ -35,6 +35,11 @@ One slide max: the two-loop diagram from README.md.
    58 s), and it kicks in automatically when the API fails, so labels will appear either way. Without credits you only
    lose the LLM repair proposals (0 applied in all runs anyway) and the LLM post-mortem paragraph in the changelog.
 1. Record the venue: 60–90 s, slow, chest height, pan gently, include furniture; AirDrop → `footage/raw/venue.mov`.
+   **Optional but powerful:** move a chair/table into a walkway, then record a second 30–60 s pass of the same area →
+   `footage/raw/venue_b.mov`. Run `./run_venue.sh footage/raw/venue.mov out/venue footage/raw/venue_b.mov` and the
+   first world change in the loop is the *real* one (scan B registered to map A, difference → the swarm fails → repair).
+   `out/venue/rescan/rescan_diff.png` shows A, B-aligned and the red/green difference. Experimental: if registration
+   looks wrong, just run without the third argument.
 2. `./run_venue.sh footage/raw/venue.mov out/venue`  (does everything: scan, loop, visuals, B-roll)
    (≈2 min scan + ≈3 min loop). If VGGT is cold it takes ~60 s longer.
 3. Optional B-roll: `spikes/genesis_sim/.venv/bin/python cogmap/broll_genesis.py out/venue/scan/belief_v0.json out/venue/go2_on_map.mp4`

@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # One-shot morning script: phone clip -> CogMap loop -> visuals -> Go2 B-roll.  Usage: ./run_venue.sh footage/raw/venue.mov [out/venue]
 set -euo pipefail
-VIDEO="${1:?usage: ./run_venue.sh <video> [out_dir]}"; OUT="${2:-out/venue}"
+VIDEO="${1:?usage: ./run_venue.sh <video> [out_dir] [rescan_video]}"; OUT="${2:-out/venue}"; RESCAN="${3:-}"
 cd "$(dirname "$0")"
 source .venv/bin/activate
 set -a; source .env; set +a
 mkdir -p "$OUT"
 echo "== CogMap on $VIDEO -> $OUT  ($(date +%H:%M:%S))"
 DUR=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$VIDEO" | cut -d. -f1); FRAMES=48; [ "${DUR:-0}" -gt 40 ] && FRAMES=64
-python -u run_demo.py --video "$VIDEO" --out "$OUT" --n-tasks 12 --frames "$FRAMES" 2>&1 | tee "$OUT/log.txt" | grep --line-buffered -E "^\[scan\]|^\[eval\]|=== Round|round .* done|patrol detected|repair #|leaderboard|Traceback|weave images"
+python -u run_demo.py --video "$VIDEO" --out "$OUT" --n-tasks 12 --frames "$FRAMES" ${RESCAN:+--rescan "$RESCAN"} 2>&1 | tee "$OUT/log.txt" | grep --line-buffered -E "^\[scan\]|^\[eval\]|=== Round|round .* done|patrol detected|repair #|leaderboard|Traceback|weave images"
 if [ -x spikes/genesis_sim/.venv/bin/python ]; then
   echo "== Go2 B-roll (walks an A* path on the scanned map)"
   spikes/genesis_sim/.venv/bin/python -u cogmap/broll_genesis.py walk "$OUT/scan/belief_v0.json" "$OUT/scan/world.json" "$OUT/scan/tasks.json" "$OUT/go2_walk.mp4" cpu 2>&1 | grep -E "wrote|Error" || true
