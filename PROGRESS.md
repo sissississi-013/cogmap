@@ -56,3 +56,6 @@
 - README: swarm GIF (docs/img/swarm.gif), office snapshot; SUBMISSION: one-command reproduction; out/dashboard.html static export.
 - Docker daemon not running → Nav2 map_server load test not possible here (format verified by unit test).
 - Validation run with all polish: out/synth_final (running).
+
+## 04:05 PDT — exploration loop (iteration 6)
+- Added frontier exploration (scout_frontier_targets → patrol → rule_repair) before each round + `known_cells` coverage metric per map version (green line on curve). Office map: +140 known cells in 353 steps on the first sweep. Full office run with exploration: out/office (running). synth_final validated (named ops, Weave Dataset, LLM post-mortem in map_changelog.md).

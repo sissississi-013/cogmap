@@ -42,7 +42,10 @@ flowchart LR
    agents verify high-volatility / low-confidence cells, so the *next* change is caught before any task fails
    (round 3 in the synthetic demo: a stale obstacle is discovered and removed pre-emptively, success stays at 100%).
    A search sweep is dispatched when a goal object goes missing, and the moved object is re-identified from its footprint.
-3. Every function is a `@weave.op`; every map version is a Weave Evaluation named `map_v{k}`; a Weave Leaderboard ranks map
+3. **Exploration — the map grows with use.** Before each round, scouts push into the frontier (known-free cells next to
+   unknown ones); whatever they observe is merged into the map, so the number of known cells rises version after version
+   (the green dotted line on the curves). The phone only ever saw part of the floor; the swarm fills in the rest.
+4. Every function is a `@weave.op`; every map version is a Weave Evaluation named `map_v{k}`; a Weave Leaderboard ranks map
    versions.
 
 **The team, as it appears in the Weave traces:** `navigator_swarm` (task robots), `scout_patrol` / `scout_search_sweep`
