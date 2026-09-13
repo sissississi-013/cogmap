@@ -155,7 +155,7 @@ is removed before any task runs (0 repairs, 574 steps vs 519 steps for a full ta
 | success recovering per map version | `out/<run>/curve.png` + Weave Evaluations compare view / leaderboard |
 | steps-to-recover per change | `out/<run>/steps_to_recover.png` |
 | human-readable changelog | `out/<run>/map_changelog.md` |
-| robot artifact | `out/<run>/scan/nav2/map.pgm`, `map.yaml`, `waypoints.json` — loads in ROS 2 Nav2 and NavFn plans on it (`scripts/nav2_check.sh`, `scripts/nav2_plan.sh`, `docs/proof/`) |
+| robot artifact | `out/<run>/scan/nav2/map.pgm`, `map.yaml`, `waypoints.json` — loads in ROS 2 Nav2 and NavFn plans on it (`scripts/nav2_plan.sh` → `out/<run>/nav2_proof/nav2_path.png`, `docs/proof/`) |
 | dashboard | `marimo run dashboard.py` |
 | 40-second B-roll reel (overview → swarm → curves → Go2) | `scripts/make_reel.sh out/<run>` → `out/<run>/reel.mp4` |
 
