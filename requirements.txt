@@ -12,6 +12,3 @@ modal
 marimo
 python-dotenv
 pytest
-torch
-transformers
-timm

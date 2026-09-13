@@ -1,0 +1,5 @@
+# optional: local OWLv2 detector fallback (no API credits needed)
+-r requirements.txt
+torch
+transformers
+timm

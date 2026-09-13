@@ -179,7 +179,7 @@ reconstructions of the same office align at 354° with a 2-cell shift; the resid
 
 ```bash
 uv venv .venv --python 3.12 && source .venv/bin/activate
-uv pip install -r requirements.txt
+uv pip install -r requirements.txt        # add -r requirements-vision.txt for the local OWLv2 detector fallback
 echo "WANDB_API_KEY=..." > .env            # Weave
 export OPENAI_API_KEY=...                 # repair agent + VLM detector (Anthropic also supported: ANTHROPIC_API_KEY)
 # no API credits? the scan falls back to a local OWLv2 detector automatically (COGMAP_DETECTOR=owlv2 forces it; ~2 s/frame on CPU)
